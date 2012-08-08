@@ -13,6 +13,17 @@
     <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
 
+    <!-- In order to use the pre-configured properties files, you should override this bean yourself in your own applicationContext.xml -->
+    <!--
+    <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
+        <property name="propertyLocations">
+            <set>
+                <value>classpath:config/bc/authorizenet/</value>
+            </set>
+        </property>
+    </bean>
+    -->
+
     <!-- Override the default Broadleaf Credit Card Service with Authorize.net -->
     <bean id="blCreditCardService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
         <property name="paymentModule" ref="blAuthorizeNetModule"/>
