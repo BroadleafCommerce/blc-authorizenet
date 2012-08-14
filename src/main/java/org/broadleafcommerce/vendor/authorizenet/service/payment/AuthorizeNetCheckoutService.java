@@ -16,7 +16,6 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
-import net.authorize.sim.Fingerprint;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
@@ -26,10 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:42 AM
+ * @author elbertbautista
  */
 public interface AuthorizeNetCheckoutService {
 

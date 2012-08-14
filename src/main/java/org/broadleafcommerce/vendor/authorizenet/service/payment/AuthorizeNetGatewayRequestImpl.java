@@ -17,10 +17,7 @@
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:49 AM
+ * @author elbertbautista
  */
 public class AuthorizeNetGatewayRequestImpl implements AuthorizeNetGatewayRequest {
 

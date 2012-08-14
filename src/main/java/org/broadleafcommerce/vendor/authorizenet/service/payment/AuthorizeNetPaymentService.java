@@ -22,10 +22,7 @@ import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:15 AM
+ * @author elbertbautista
  */
 public interface AuthorizeNetPaymentService {
 

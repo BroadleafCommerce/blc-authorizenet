@@ -19,11 +19,7 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
 import java.io.Serializable;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 10:56 AM
- * To change this template use File | Settings | File Templates.
+ * @author elbertbautista
  */
 public class AuthorizeNetPaymentRequest implements Serializable {
 

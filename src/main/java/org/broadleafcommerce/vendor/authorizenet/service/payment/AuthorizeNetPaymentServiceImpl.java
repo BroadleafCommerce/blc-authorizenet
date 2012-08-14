@@ -19,17 +19,13 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
 import net.authorize.sim.Result;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:17 AM
+ * @author elbertbautista
+ *
  */
 public class AuthorizeNetPaymentServiceImpl implements AuthorizeNetPaymentService, ServiceStatusDetectable<AuthorizeNetPaymentRequest> {
 

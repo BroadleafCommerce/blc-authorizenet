@@ -38,11 +38,8 @@ import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetPaymentService;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
-import sun.net.idn.StringPrep;
 
-import javax.annotation.Resource;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -123,7 +120,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
         responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName())));
-        responseItem.setProcessorResponseCode(result.getResponseCode().getCode()+"");
+        responseItem.setProcessorResponseCode(result.getResponseCode().getCode() + "");
         responseItem.setProcessorResponseText(result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
         setPaymentResponseAdditionalFields(paymentContext, responseItem, result);
 
