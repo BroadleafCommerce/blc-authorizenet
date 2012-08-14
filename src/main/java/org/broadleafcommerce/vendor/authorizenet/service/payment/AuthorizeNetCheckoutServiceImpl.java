@@ -53,10 +53,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:42 AM
+ * @author elbertbautista
  */
 @Service("blAuthorizeNetCheckoutService")
 public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutService {
@@ -133,38 +130,26 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
     @Override
     public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException {
-        //Result result = Result.createResult(apiLoginId, merchantMD5Key, responseMap);
-        //if (order != null) {
-            Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
+         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
 
-            //NOTE: assumes only one payment info of type credit card on the order.
-            //Start by removing any payment info of type credit card already on the order.
-            orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
+        //NOTE: assumes only one payment info of type credit card on the order.
+        //Start by removing any payment info of type credit card already on the order.
+        orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
 
-            PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
-            authorizeNetPaymentInfo.setOrder(order);
-            authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
-            //authorizeNetPaymentInfo.setAmount(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName())));
-            authorizeNetPaymentInfo.setReferenceNumber(order.getOrderNumber());
-            authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
+        PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
+        authorizeNetPaymentInfo.setOrder(order);
+        authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
+        authorizeNetPaymentInfo.setReferenceNumber(order.getOrderNumber());
+        authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
 
-            //finally add the authorizenet payment info to the order
-            order.getPaymentInfos().add(authorizeNetPaymentInfo);
+        //finally add the authorizenet payment info to the order
+        order.getPaymentInfos().add(authorizeNetPaymentInfo);
 
-            CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
-            creditCardPaymentInfo.setReferenceNumber(authorizeNetPaymentInfo.getReferenceNumber());
-            payments.put(authorizeNetPaymentInfo, creditCardPaymentInfo);
+        CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
+        creditCardPaymentInfo.setReferenceNumber(authorizeNetPaymentInfo.getReferenceNumber());
+        payments.put(authorizeNetPaymentInfo, creditCardPaymentInfo);
 
-            return checkoutService.performCheckout(order, payments);
-//            CheckoutResponse checkoutResponse = checkoutService.performCheckout(order, payments);
-//
-//            PaymentResponseItem responseItem = checkoutResponse.getPaymentResponse().getResponseItems().get(authorizeNetPaymentInfo);
-//
-//
-//            return checkoutResponse;
-        //}
-
-        //throw new CheckoutException("Authorize.net DPM Relay Response is Invalid. Check your application keys and hash.", new CheckoutSeed(order, null, null));
+        return checkoutService.performCheckout(order, payments);
     }
 
     @Override

@@ -42,10 +42,7 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 11:54 AM
+ * @author elbertbautista
  */
 public class BroadleafAuthorizeNetController extends BroadleafCheckoutController {
 

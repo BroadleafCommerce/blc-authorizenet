@@ -47,11 +47,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created with IntelliJ IDEA.
- * User: elbertbautista
- * Date: 6/27/12
- * Time: 10:53 AM
- * To change this template use File | Settings | File Templates.
+ * @author elbertbautista
  */
 public class AuthorizeNetPaymentModule implements PaymentModule {
 
@@ -89,8 +85,6 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         PaymentInfo paymentInfo = paymentContext.getPaymentInfo();
 
         Assert.isTrue(paymentInfo.getRequestParameterMap() != null && !paymentInfo.getRequestParameterMap().isEmpty(), "Must set the Request Parameter Map on the PaymentInfo instance.");
-        //Assert.isTrue(paymentInfo.getAdditionalFields().containsKey(ResponseField.RESPONSE_CODE.getFieldName()), "Must pass a RESPONSE_CODE value on the additionalFields of the PaymentInfo instance.");
-        //Assert.isTrue(paymentInfo.getAmount() != null, "Payment Info Amount must not be null");
 
         if (LOG.isDebugEnabled()) {
             LOG.debug(paymentContext.getPaymentInfo().getAdditionalFields().get(ResponseField.RESPONSE_CODE.getFieldName()));
