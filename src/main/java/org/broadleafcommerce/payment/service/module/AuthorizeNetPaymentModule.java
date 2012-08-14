@@ -86,10 +86,6 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
 
         Assert.isTrue(paymentInfo.getRequestParameterMap() != null && !paymentInfo.getRequestParameterMap().isEmpty(), "Must set the Request Parameter Map on the PaymentInfo instance.");
 
-        if (LOG.isDebugEnabled()) {
-            LOG.debug(paymentContext.getPaymentInfo().getAdditionalFields().get(ResponseField.RESPONSE_CODE.getFieldName()));
-        }
-
         return buildBasicDPMResponse(paymentContext);
     }
 
