@@ -38,4 +38,8 @@ public interface AuthorizeNetGatewayRequest extends Serializable {
 
     void setRelayResponseUrl(String relayResponseUrl);
 
+    String getMerchantMD5Key();
+
+    void setMerchantMD5Key(String merchantMD5Key);
+
 }

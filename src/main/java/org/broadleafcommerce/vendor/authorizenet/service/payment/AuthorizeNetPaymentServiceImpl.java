@@ -16,10 +16,14 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
+import net.authorize.sim.Result;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -62,10 +66,12 @@ public class AuthorizeNetPaymentServiceImpl implements AuthorizeNetPaymentServic
     }
 
     @Override
+    //Implement for AIM (Advance Integration Method)
     public Object process(AuthorizeNetPaymentRequest arg) throws Exception {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
+    //Implement for AIM (Advance Integration Method)
     protected String communicateWithVendor(AuthorizeNetPaymentRequest paymentRequest) throws IOException {
         return null;
     }
@@ -76,6 +82,11 @@ public class AuthorizeNetPaymentServiceImpl implements AuthorizeNetPaymentServic
 
     public void setFailureReportingThreshold(Integer failureReportingThreshold) {
         this.failureReportingThreshold = failureReportingThreshold;
+    }
+
+    @Override
+    public Result createResult(Map<String, String[]> responseMap) {
+        return Result.createResult(gatewayRequest.getApiLoginId(), gatewayRequest.getMerchantMD5Key(), responseMap);
     }
 
     public AuthorizeNetGatewayRequest getGatewayRequest() {

@@ -16,7 +16,10 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
+import net.authorize.sim.Result;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
+
+import java.util.Map;
 
 /**
  * Created with IntelliJ IDEA.
@@ -33,5 +36,11 @@ public interface AuthorizeNetPaymentService {
     public Integer getFailureReportingThreshold();
 
     public void setFailureReportingThreshold(Integer failureReportingThreshold);
+
+    public Result createResult(Map<String, String[]> responseMap);
+
+    public AuthorizeNetGatewayRequest getGatewayRequest();
+
+    public void setGatewayRequest(AuthorizeNetGatewayRequest gatewayRequest);
 
 }

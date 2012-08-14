@@ -27,6 +27,7 @@ public class AuthorizeNetGatewayRequestImpl implements AuthorizeNetGatewayReques
     protected String apiLoginId;
     protected String transactionKey;
     protected String relayResponseUrl;
+    protected String merchantMD5Key;
 
     public String getApiLoginId() {
         return apiLoginId;
@@ -50,5 +51,13 @@ public class AuthorizeNetGatewayRequestImpl implements AuthorizeNetGatewayReques
 
     public void setRelayResponseUrl(String relayResponseUrl) {
         this.relayResponseUrl = relayResponseUrl;
+    }
+
+    public String getMerchantMD5Key() {
+        return merchantMD5Key;
+    }
+
+    public void setMerchantMD5Key(String merchantMD5Key) {
+        this.merchantMD5Key = merchantMD5Key;
     }
 }
