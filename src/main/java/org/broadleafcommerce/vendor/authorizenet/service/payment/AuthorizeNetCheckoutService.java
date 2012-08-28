@@ -21,6 +21,7 @@ import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 
@@ -29,11 +30,13 @@ import java.util.Map;
  */
 public interface AuthorizeNetCheckoutService {
 
-    public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+    public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, InvalidKeyException;
 
     public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException;
 
-    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, UnsupportedEncodingException;
+    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, InvalidKeyException;
 
     public String buildRelayResponse(String receiptUrl);
+
+    public String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, InvalidKeyException;
 }

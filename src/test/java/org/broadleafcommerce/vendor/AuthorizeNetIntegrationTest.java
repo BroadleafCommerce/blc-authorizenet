@@ -16,6 +16,7 @@
 
 package org.broadleafcommerce.vendor;
 
+import net.authorize.sim.Result;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -55,6 +56,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -67,6 +70,9 @@ import java.util.Set;
 public class AuthorizeNetIntegrationTest extends BaseTest {
 
     private static final Log LOG = LogFactory.getLog(AuthorizeNetIntegrationTest.class);
+    public static final String BLC_CID = "blc_cid";
+    public static final String BLC_OID = "blc_oid";
+    public static final String BLC_TPS = "blc_tps";
 
     @Resource(name = "blAuthorizeNetVendorOrientedPaymentService")
     protected AuthorizeNetPaymentService paymentService;
@@ -143,7 +149,28 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
 
                 response.setContentType("text/html");
                 response.setStatus(HttpServletResponse.SC_OK);
-                String responseBody = checkoutService.buildRelayResponse(authorizeNetConfirmUrl);
+                String responseBody = "";
+
+                try {
+                    Result result = paymentService.createResult(request.getParameterMap());
+                    Long customerId = Long.parseLong(result.getResponseMap().get(BLC_CID));
+                    Long orderId = Long.parseLong(result.getResponseMap().get(BLC_OID));
+                    String formTps = result.getResponseMap().get(BLC_TPS);
+                    String tps = checkoutService.createTamperProofSeal(customerId, orderId);
+
+                    if (result.isAuthorizeNet() && result.isApproved() && formTps.equals(tps)) {
+                        responseBody = checkoutService.buildRelayResponse(authorizeNetConfirmUrl);
+                    } else {
+                        responseBody = checkoutService.buildRelayResponse(authorizeNetErrorUrl);
+                    }
+
+                } catch (NoSuchAlgorithmException e) {
+                    LOG.fatal(e);
+                } catch (InvalidKeyException e) {
+                    LOG.fatal(e);
+                }
+
+
                 response.getWriter().println(responseBody);
                 ((Request)request).setHandled(true);
             }

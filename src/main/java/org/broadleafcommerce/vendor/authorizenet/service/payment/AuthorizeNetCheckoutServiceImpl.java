@@ -19,6 +19,7 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
 import net.authorize.ResponseField;
 import net.authorize.sim.Fingerprint;
 import net.authorize.sim.Result;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.core.checkout.service.CheckoutService;
@@ -35,8 +36,11 @@ import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
+import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -69,7 +73,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     protected OrderService orderService;
 
     @Override
-    public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Order findCartForCustomer(Map<String, String[]> responseMap) throws InvalidKeyException, NoSuchAlgorithmException {
         Result result = authorizeNetPaymentService.createResult(responseMap);
 
         if (LOG.isDebugEnabled()) {
@@ -89,7 +93,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
                 LOG.debug("tps - " + tps);
             }
 
-            if (tps.equalsIgnoreCase(formTps)) {
+            if (tps.equals(formTps)) {
                 Order order = orderService.findOrderById(orderId);
                 if (order != null && order.getCustomer().getId().equals(customerId)){
                     return order;
@@ -125,7 +129,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     }
 
     @Override
-    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws InvalidKeyException, NoSuchAlgorithmException {
         if (order != null) {
             String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
             String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
@@ -185,18 +189,19 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return response.toString();
     }
 
-    protected String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
-        String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
+    @Override
+    public String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, InvalidKeyException {
         String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
 
-        MessageDigest md5 = MessageDigest.getInstance("MD5");
-        String tamperProofSeal = customerId.toString() + orderId.toString() + apiLoginId + transactionKey;
-        md5.digest(tamperProofSeal.getBytes("UTF-8"));
-        tamperProofSeal = new BigInteger(1, md5.digest()).toString(16).toUpperCase();
-        while(tamperProofSeal.length() < 32) {
-            tamperProofSeal = "0" + tamperProofSeal;
-        }
-        return tamperProofSeal;
+        Base64 encoder = new Base64();
+        Mac sha1Mac = Mac.getInstance("HmacSHA1");
+        SecretKeySpec publicKeySpec = new SecretKeySpec(transactionKey.getBytes(), "HmacSHA1");
+        sha1Mac.init(publicKeySpec);
+        String customerOrderString = customerId.toString() + orderId.toString();
+        byte[] publicBytes = sha1Mac.doFinal(customerOrderString.getBytes());
+        String publicDigest = encoder.encodeToString(publicBytes);
+        return publicDigest.replaceAll("\\r|\\n", "");
+
     }
 
 }

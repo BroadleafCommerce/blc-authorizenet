@@ -37,6 +37,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
@@ -68,7 +69,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                 }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error("Error Creating Authorize.net Checkout Form " + e);
-            } catch (UnsupportedEncodingException e) {
+            } catch (InvalidKeyException e) {
                 LOG.error("Error Creating Authorize.net Checkout Form " + e);
             }
         }
@@ -76,7 +77,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
         return super.checkout(request, response, model);
     }
 
-    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, UnsupportedEncodingException, PricingException {
+    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException {
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
         if (!(order instanceof NullOrderImpl)) {
             try {
