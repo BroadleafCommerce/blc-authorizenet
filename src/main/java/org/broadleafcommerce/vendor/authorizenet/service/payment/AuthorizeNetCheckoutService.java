@@ -35,4 +35,5 @@ public interface AuthorizeNetCheckoutService {
 
     public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, UnsupportedEncodingException;
 
+    public String buildRelayResponse(String receiptUrl);
 }

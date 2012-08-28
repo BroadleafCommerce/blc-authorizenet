@@ -97,9 +97,9 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Transaction success for order " + checkoutResponse.getOrder().getOrderNumber());
                         LOG.debug("Response for Authorize.net to relay to client: ");
-                        LOG.debug(buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber()));
+                        LOG.debug(authorizeNetCheckoutService.buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber()));
                     }
-                    return buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
+                    return authorizeNetCheckoutService.buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
                 }
             } catch (CheckoutException e) {
                 if (LOG.isErrorEnabled()) {
@@ -113,32 +113,9 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
         }
 
         processFailedOrderCheckout(order);
-        return buildRelayResponse(authorizeNetErrorUrl);
+        return authorizeNetCheckoutService.buildRelayResponse(authorizeNetErrorUrl);
     }
 
-    private String buildRelayResponse (String receiptUrl) {
-        StringBuffer response = new StringBuffer();
-        response.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n \"http://www.w3.org/TR/html4/loose.dtd\">");
-        response.append("<html>");
-        response.append("<head>");
-        response.append("</head>");
-        response.append("<body>");
-        response.append("<script type=\"text/javascript\">");
-        response.append("var referrer = document.referrer;");
-        response.append("if (referrer.substr(0,7)==\"http://\") referrer = referrer.substr(7);");
-        response.append("if (referrer.substr(0,8)==\"https://\") referrer = referrer.substr(8);");
-        response.append("if(referrer && referrer.indexOf(document.location.hostname) != 0) {");
-        response.append("document.location = \"" + receiptUrl +"\";");
-        response.append("}");
-        response.append("</script>");
-        response.append("<noscript>");
-        response.append("<meta http-equiv=\"refresh\" content=\"0;url=" + receiptUrl + "\">");
-        response.append("</noscript>");
-        response.append("</body>");
-        response.append("</html>");
-
-        return response.toString();
-    }
 
     private String requestParamToString(HttpServletRequest request) {
         StringBuffer requestMap = new StringBuffer();

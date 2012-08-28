@@ -44,6 +44,9 @@
                 <property name="transactionKey" value="${authorizenet.transaction.key}"/>
                 <property name="relayResponseUrl" value="${authorizenet.relay.response.url}"/>
                 <property name="merchantMD5Key" value="${authorizenet.merchant.md5.key}"/>
+                <property name="merchantTransactionVersion" value="${authorizenet.merchant.transaction.version}" />
+                <property name="xTestRequest" value="${authorizenet.x_test_request}" />
+                <property name="serverUrl" value="${authorizenet.server.url}" />
             </bean>
         </property>
     </bean>

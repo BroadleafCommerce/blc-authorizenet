@@ -32,7 +32,6 @@ import org.broadleafcommerce.core.payment.domain.Referenced;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
@@ -68,24 +67,6 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
     @Resource(name="blOrderService")
     protected OrderService orderService;
-
-    @Value("${authorizenet.api.login.id}")
-    protected String apiLoginId;
-
-    @Value("${authorizenet.transaction.key}")
-    protected String transactionKey;
-
-    @Value("${authorizenet.relay.response.url}")
-    protected String relayResponseURL;
-
-    @Value("${authorizenet.merchant.transaction.version}")
-    protected String merchantTransactionVersion;
-
-    @Value("${authorizenet.x_test_request}")
-    protected String xTestRequest;
-
-    @Value("${authorizenet.server.url}")
-    protected String serverUrl;
 
     @Override
     public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, UnsupportedEncodingException {
@@ -146,6 +127,13 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     @Override
     public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         if (order != null) {
+            String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
+            String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
+            String relayResponseURL = authorizeNetPaymentService.getGatewayRequest().getRelayResponseUrl();
+            String merchantTransactionVersion = authorizeNetPaymentService.getGatewayRequest().getMerchantTransactionVersion();
+            String xTestRequest = authorizeNetPaymentService.getGatewayRequest().getxTestRequest();
+            String serverUrl = authorizeNetPaymentService.getGatewayRequest().getServerUrl();
+
             Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), order.getTotal().toString());
             Map<String, String> formFields = new HashMap<String, String>();
             formFields.put("x_invoice_num", System.currentTimeMillis()+"");
@@ -172,7 +160,35 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return null;
     }
 
+    @Override
+    public String buildRelayResponse (String receiptUrl) {
+        StringBuffer response = new StringBuffer();
+        response.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n \"http://www.w3.org/TR/html4/loose.dtd\">");
+        response.append("<html>");
+        response.append("<head>");
+        response.append("</head>");
+        response.append("<body>");
+        response.append("<script type=\"text/javascript\">");
+        response.append("var referrer = document.referrer;");
+        response.append("if (referrer.substr(0,7)==\"http://\") referrer = referrer.substr(7);");
+        response.append("if (referrer.substr(0,8)==\"https://\") referrer = referrer.substr(8);");
+        response.append("if(referrer && referrer.indexOf(document.location.hostname) != 0) {");
+        response.append("document.location = \"" + receiptUrl +"\";");
+        response.append("}");
+        response.append("</script>");
+        response.append("<noscript>");
+        response.append("<meta http-equiv=\"refresh\" content=\"0;url=" + receiptUrl + "\">");
+        response.append("</noscript>");
+        response.append("</body>");
+        response.append("</html>");
+
+        return response.toString();
+    }
+
     protected String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+        String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
+        String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
+
         MessageDigest md5 = MessageDigest.getInstance("MD5");
         String tamperProofSeal = customerId.toString() + orderId.toString() + apiLoginId + transactionKey;
         md5.digest(tamperProofSeal.getBytes("UTF-8"));

@@ -16,6 +16,8 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
+import org.springframework.beans.factory.annotation.Value;
+
 /**
  * @author elbertbautista
  */
@@ -25,36 +27,77 @@ public class AuthorizeNetGatewayRequestImpl implements AuthorizeNetGatewayReques
     protected String transactionKey;
     protected String relayResponseUrl;
     protected String merchantMD5Key;
+    protected String merchantTransactionVersion;
+    protected String xTestRequest;
+    protected String serverUrl;
 
+    @Override
     public String getApiLoginId() {
         return apiLoginId;
     }
 
+    @Override
     public void setApiLoginId(String apiLoginId) {
         this.apiLoginId = apiLoginId;
     }
 
+    @Override
     public String getTransactionKey() {
         return transactionKey;
     }
 
+    @Override
     public void setTransactionKey(String transactionKey) {
         this.transactionKey = transactionKey;
     }
 
+    @Override
     public String getRelayResponseUrl() {
         return relayResponseUrl;
     }
 
+    @Override
     public void setRelayResponseUrl(String relayResponseUrl) {
         this.relayResponseUrl = relayResponseUrl;
     }
 
+    @Override
     public String getMerchantMD5Key() {
         return merchantMD5Key;
     }
 
+    @Override
     public void setMerchantMD5Key(String merchantMD5Key) {
         this.merchantMD5Key = merchantMD5Key;
+    }
+
+    @Override
+    public String getMerchantTransactionVersion() {
+        return merchantTransactionVersion;
+    }
+
+    @Override
+    public void setMerchantTransactionVersion(String merchantTransactionVersion) {
+        this.merchantTransactionVersion = merchantTransactionVersion;
+    }
+
+    @Override
+    public String getxTestRequest() {
+        return xTestRequest;
+    }
+
+    @Override
+    public void setxTestRequest(String xTestRequest) {
+        this.xTestRequest = xTestRequest;
+    }
+
+    @Override
+    public String getServerUrl() {
+        return serverUrl;
+    }
+
+    @Override
+    public void setServerUrl(String serverUrl) {
+        this.serverUrl = serverUrl;
     }
 }

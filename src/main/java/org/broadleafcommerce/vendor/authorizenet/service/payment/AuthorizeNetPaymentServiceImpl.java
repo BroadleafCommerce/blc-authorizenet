@@ -19,6 +19,7 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
 import net.authorize.sim.Result;
 import org.broadleafcommerce.common.vendor.service.monitor.ServiceStatusDetectable;
 import org.broadleafcommerce.common.vendor.service.type.ServiceStatusType;
+import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.Map;
@@ -27,6 +28,7 @@ import java.util.Map;
  * @author elbertbautista
  *
  */
+@Service("blAuthorizeNetVendorOrientedPaymentService")
 public class AuthorizeNetPaymentServiceImpl implements AuthorizeNetPaymentService, ServiceStatusDetectable<AuthorizeNetPaymentRequest> {
 
     protected Integer failureReportingThreshold;

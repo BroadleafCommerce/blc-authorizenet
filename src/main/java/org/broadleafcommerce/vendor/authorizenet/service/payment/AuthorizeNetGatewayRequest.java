@@ -39,4 +39,15 @@ public interface AuthorizeNetGatewayRequest extends Serializable {
 
     void setMerchantMD5Key(String merchantMD5Key);
 
+    String getMerchantTransactionVersion();
+
+    void setMerchantTransactionVersion(String merchantTransactionVersion);
+
+    String getxTestRequest();
+
+    void setxTestRequest(String xTestRequest);
+
+    String getServerUrl();
+
+    void setServerUrl(String serverUrl);
 }
