@@ -32,6 +32,7 @@ import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetChe
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -59,7 +60,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
     protected String authorizeNetConfirmUrl;
 
     @Override
-    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model) {
+    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model, RedirectAttributes redirectAttributes) {
         Order order = CartState.getCart();
         if (!(order instanceof NullOrderImpl)) {
             try {
@@ -74,7 +75,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
             }
         }
 
-        return super.checkout(request, response, model);
+        return super.checkout(request, response, model, redirectAttributes);
     }
 
     public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException {
