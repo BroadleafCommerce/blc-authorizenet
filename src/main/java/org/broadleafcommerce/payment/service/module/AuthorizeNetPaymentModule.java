@@ -18,27 +18,34 @@ package org.broadleafcommerce.payment.service.module;
 
 import net.authorize.ResponseField;
 import net.authorize.sim.Result;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.persistence.EntityConfiguration;
 import org.broadleafcommerce.common.time.SystemTime;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
-import org.broadleafcommerce.core.payment.domain.PaymentResponseItemImpl;
 import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
 import org.broadleafcommerce.core.payment.service.module.PaymentModule;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoAdditionalFieldType;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
-import org.broadleafcommerce.profile.core.domain.*;
+import org.broadleafcommerce.profile.core.domain.Address;
+import org.broadleafcommerce.profile.core.domain.Country;
+import org.broadleafcommerce.profile.core.domain.Customer;
+import org.broadleafcommerce.profile.core.domain.Phone;
+import org.broadleafcommerce.profile.core.domain.State;
 import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetPaymentService;
 import org.springframework.util.Assert;
+
+import javax.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -57,6 +64,9 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     protected CountryService countryService;
 
     protected CustomerService customerService;
+    
+    @Resource(name="blEntityConfiguration")
+    protected EntityConfiguration entityConfiguration;
 
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
@@ -116,7 +126,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         setShippingInfo(paymentContext, result);
         setPaymentInfoAdditionalFields(paymentContext, result);
 
-        PaymentResponseItem responseItem = new PaymentResponseItemImpl();
+        PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
         responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName())));
@@ -195,7 +205,8 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
             }
         }
 
-        Address address = new AddressImpl();
+        Address address = entityConfiguration.createEntityInstance(Address.class.getName(), Address.class);
+        Phone phone = null;
         boolean billingPopulated = false;
 
         for (ResponseField field : ResponseField.values()) {
@@ -221,6 +232,10 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
                             break;
                         case ZIP_CODE: address.setPostalCode(value); break;
                         case EMAIL_ADDRESS: address.setEmailAddress(value); break;
+                        case PHONE: 
+                            phone = entityConfiguration.createEntityInstance(Phone.class.getName(), Phone.class);
+                            phone.setPhoneNumber(value);
+                            break;
                         default: break;
                     }
                 }
@@ -231,12 +246,13 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         //set billing address on the payment info
         if (billingPopulated) {
             paymentInfo.setAddress(address);
+            paymentInfo.setPhone(phone);
         }
     }
 
     protected void setShippingInfo(PaymentContext paymentContext, Result result) {
         Order order = paymentContext.getPaymentInfo().getOrder();
-        Address address = new AddressImpl();
+        Address address = entityConfiguration.createEntityInstance(Address.class.getName(), Address.class);
         boolean shippingPopulated = false;
         for (ResponseField field : ResponseField.values()) {
             if (isShippingAddressField(field) && !StringUtils.isEmpty(result.getResponseMap().get(field.getFieldName()))) {
@@ -293,7 +309,8 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
                 ResponseField.STATE.equals(field) ||
                 ResponseField.ZIP_CODE.equals(field) ||
                 ResponseField.COUNTRY.equals(field) ||
-                ResponseField.EMAIL_ADDRESS.equals(field)) {
+                ResponseField.EMAIL_ADDRESS.equals(field) ||
+                ResponseField.PHONE.equals(field)) {
             return true;
         }
         return false;
