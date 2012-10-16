@@ -81,6 +81,7 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
     public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException {
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
+        boolean rollback = false;
         if (order != null && !(order instanceof NullOrderImpl)) {
             try {
 
@@ -104,18 +105,26 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                     }
                     return authorizeNetCheckoutService.buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
                 }
+                
+                //payment response was unsuccessful; rollback
+                rollback = true;
             } catch (CheckoutException e) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Checkout Exception occurred processing Authorize.net relay response (params: [" + requestParamToString(request) + "])" + e);
                 }
+                //rollback for exception processing
+                rollback = true;
             }
         } else {
             if (LOG.isFatalEnabled()) {
                 LOG.fatal("The order could not be determined from the Authorize.net relay response (params: [" + requestParamToString(request) + "]). NOTE: The transaction may have completed successfully. Check your application keys and hash.");
             }
         }
-
-        processFailedOrderCheckout(order);
+        //Only process the failed order if it was initialized for submission in the first place
+        if (rollback) {
+            processFailedOrderCheckout(order);
+        }
+        
         return authorizeNetCheckoutService.buildRelayResponse(authorizeNetErrorUrl);
     }
 
