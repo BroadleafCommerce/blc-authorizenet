@@ -19,6 +19,7 @@ package org.broadleafcommerce.vendor.authorizenet.service.payment;
 import net.authorize.ResponseField;
 import net.authorize.sim.Fingerprint;
 import net.authorize.sim.Result;
+
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,10 +39,8 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.UnsupportedEncodingException;
-import java.math.BigInteger;
+
 import java.security.InvalidKeyException;
-import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,6 +148,12 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             formFields.put("x_version", merchantTransactionVersion);
             formFields.put("x_method", "CC");
             formFields.put("x_type", "AUTH_CAPTURE");
+            if(order.getCurrency()==null || order.getCurrency().getCurrencyCode().equals("USD")) {
+             //currency can be defaulted to null, but if not, then it has to be usd to proceed.
+            } else {
+                LOG.error("Only USD currency is accepted by Authorize.net..Currency("+order.getCurrency().getCurrencyCode()+") not supported");
+                throw new InvalidKeyException("Only USD currency is accepted by Authorize.net.. Currency ("+order.getCurrency().getCurrencyCode()+") not supported");
+            }
             formFields.put("x_amount", order.getTotal().toString());
             formFields.put("x_test_request", xTestRequest);
 
@@ -159,6 +164,8 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             formFields.put("authorizenet_server_url", serverUrl);
 
             return formFields;
+        } else {
+            LOG.warn("Order is null");   
         }
 
         return null;
