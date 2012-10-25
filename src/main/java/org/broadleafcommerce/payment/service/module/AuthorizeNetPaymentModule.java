@@ -129,7 +129,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
-        responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName())));
+        responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()),paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));
         responseItem.setProcessorResponseCode(result.getResponseCode().getCode() + "");
         responseItem.setProcessorResponseText(result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
         setPaymentResponseAdditionalFields(paymentContext, responseItem, result);
