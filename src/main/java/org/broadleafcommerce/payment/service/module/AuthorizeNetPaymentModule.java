@@ -206,6 +206,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         }
 
         Address address = entityConfiguration.createEntityInstance(Address.class.getName(), Address.class);
+        initializeEmptyAddress(address);
         Phone phone = null;
         boolean billingPopulated = false;
 
@@ -253,6 +254,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     protected void setShippingInfo(PaymentContext paymentContext, Result result) {
         Order order = paymentContext.getPaymentInfo().getOrder();
         Address address = entityConfiguration.createEntityInstance(Address.class.getName(), Address.class);
+        initializeEmptyAddress(address);
         boolean shippingPopulated = false;
         for (ResponseField field : ResponseField.values()) {
             if (isShippingAddressField(field) && !StringUtils.isEmpty(result.getResponseMap().get(field.getFieldName()))) {
@@ -288,13 +290,30 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
             populateShippingAddressOnOrder(order, address);
         }
     }
+    
+    /**
+     * Sets all the non-nullable fields for an address to empty strings. This way we won't get any Hibernate exceptions
+     * should a user get past any client-side validations for BLC-required address fields. The correct thing to do is not
+     * to show an error message because the card would have already been successfully charged.
+     * 
+     * @param address
+     */
+    protected void initializeEmptyAddress(Address address) {
+        address.setAddressLine1("");
+        address.setCity("");
+        address.setPostalCode("");
+    }
 
+    /**
+     * If you pass the shipping address to Authorize.net, there has to be an existing fulfillment group on the order.
+     * This must be done because of pricing considerations. The fulfillment group must be constructed when adding to the
+     * cart or sometime before calling the gateway. This depends on UX. This default implementation assumes one fulfillment
+     * group per order because Authorize.net only supports a single shipping address. Override this method if necessary.
+     * 
+     * @param order
+     * @param shippingAddress
+     */
     protected void populateShippingAddressOnOrder(Order order, Address shippingAddress) {
-        // If you pass the shipping address to Authorize.net, there has to be an existing fulfillment group on the order.
-        // This must be done because of pricing considerations.
-        // The fulfillment group must be constructed when adding to the cart or sometime before calling the gateway. This depends on UX.
-        // This default implementation assumes one fulfillment group per order because Authorize.net only supports a single shipping address.
-        // Override this method if necessary.
         if (order.getFulfillmentGroups() != null && order.getFulfillmentGroups().size()==1) {
             FulfillmentGroup fg = order.getFulfillmentGroups().get(0);
             fg.setAddress(shippingAddress);
