@@ -128,8 +128,15 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     }
 
     @Override
-    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws InvalidKeyException, NoSuchAlgorithmException {
+    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedOperationException {
         if (order != null) {
+            
+            if (order.getCurrency() != null && !order.getCurrency().getCurrencyCode().equals("USD")) {
+                String errorMessage = "Only USD currency is accepted by Authorize.net. Currency ("+ order.getCurrency().getCurrencyCode() + ") not supported";
+                LOG.error(errorMessage);
+                throw new UnsupportedOperationException(errorMessage);
+            }
+            
             String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
             String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
             String relayResponseURL = authorizeNetPaymentService.getGatewayRequest().getRelayResponseUrl();
@@ -148,12 +155,6 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             formFields.put("x_version", merchantTransactionVersion);
             formFields.put("x_method", "CC");
             formFields.put("x_type", "AUTH_CAPTURE");
-            if(order.getCurrency()==null || order.getCurrency().getCurrencyCode().equals("USD")) {
-             //currency can be defaulted to null, but if not, then it has to be usd to proceed.
-            } else {
-                LOG.error("Only USD currency is accepted by Authorize.net..Currency("+order.getCurrency().getCurrencyCode()+") not supported");
-                throw new InvalidKeyException("Only USD currency is accepted by Authorize.net.. Currency ("+order.getCurrency().getCurrencyCode()+") not supported");
-            }
             formFields.put("x_amount", order.getTotal().toString());
             formFields.put("x_test_request", xTestRequest);
 

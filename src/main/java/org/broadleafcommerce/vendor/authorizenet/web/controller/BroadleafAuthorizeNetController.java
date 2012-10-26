@@ -73,6 +73,8 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                 LOG.error("Error Creating Authorize.net Checkout Form " + e);
             } catch (InvalidKeyException e) {
                 LOG.error("Error Creating Authorize.net Checkout Form " + e);
+            } catch (UnsupportedOperationException e) {
+                LOG.error("Error Creating Authorize.net Checkout Form " + e);
             }
         }
 
