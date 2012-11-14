@@ -20,7 +20,6 @@ import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
 
-import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
@@ -30,6 +29,17 @@ import java.util.Map;
  */
 public interface AuthorizeNetCheckoutService {
 
+    /**
+     * Returns the {@link Order} corresponding to the orderId gleaned from the response map
+     * 
+     * @param responseMap
+     * @return <b>null</b> if {@link Order#getStatus()} of the order from <b>responseMap</b> is anything other than
+     * IN_PROCESS or if there is a problem with tps or MD5 keys. Otherwise this will return the {@link Order} corresponding
+     * to the 'blc_oid' parameter
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @see {@link AuthorizeNetCheckoutServiceImpl#BLC_OID}
+     */
     public Order findCartForCustomer(Map<String, String[]> responseMap) throws NoSuchAlgorithmException, InvalidKeyException;
 
     public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException;
