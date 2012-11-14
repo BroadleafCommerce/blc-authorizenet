@@ -17,6 +17,7 @@
 package org.broadleafcommerce.vendor;
 
 import net.authorize.sim.Result;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -34,6 +35,7 @@ import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.domain.OrderImpl;
 import org.broadleafcommerce.core.order.service.OrderService;
+import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
 import org.broadleafcommerce.profile.core.domain.Customer;
 import org.broadleafcommerce.profile.core.domain.CustomerImpl;
@@ -55,6 +57,7 @@ import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -110,6 +113,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
         customer.setLastName("Jordan");
         customer = customerService.saveCustomer(customer);
         order.setCustomer(customer);
+        order.setStatus(OrderStatus.IN_PROCESS);
 
         orderService.save(order, false);
     }
@@ -182,7 +186,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
         server.start();
 
         if (LOG.isDebugEnabled()) {
-            LOG.debug("*** Initiating testSuccessfulBraintreeAuthorizeAndDebit ***");
+            LOG.debug("*** Initiating testSuccessfulAuthorizenetAuthorizeAndDebit ***");
         }
 
 

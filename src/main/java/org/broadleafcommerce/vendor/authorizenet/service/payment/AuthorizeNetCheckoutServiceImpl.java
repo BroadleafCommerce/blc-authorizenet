@@ -28,6 +28,7 @@ import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.service.OrderService;
+import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.Referenced;
@@ -94,7 +95,8 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
             if (tps.equals(formTps)) {
                 Order order = orderService.findOrderById(orderId);
-                if (order != null && order.getCustomer().getId().equals(customerId)){
+                if (order != null && order.getCustomer().getId().equals(customerId)
+                        && OrderStatus.IN_PROCESS.equals(order.getStatus())) {
                     return order;
                 }
             }
