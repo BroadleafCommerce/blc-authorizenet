@@ -146,7 +146,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             String xTestRequest = authorizeNetPaymentService.getGatewayRequest().getxTestRequest();
             String serverUrl = authorizeNetPaymentService.getGatewayRequest().getServerUrl();
 
-            Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), order.getTotal().toString());
+            Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), order.getRemainingTotal().toString());
             Map<String, String> formFields = new HashMap<String, String>();
             formFields.put("x_invoice_num", System.currentTimeMillis()+"");
             formFields.put("x_relay_url", relayResponseURL);
@@ -157,7 +157,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             formFields.put("x_version", merchantTransactionVersion);
             formFields.put("x_method", "CC");
             formFields.put("x_type", "AUTH_CAPTURE");
-            formFields.put("x_amount", order.getTotal().toString());
+            formFields.put("x_amount", order.getRemainingTotal().toString());
             formFields.put("x_test_request", xTestRequest);
 
             formFields.put(BLC_CID, order.getCustomer().getId().toString());
