@@ -32,6 +32,7 @@ import org.broadleafcommerce.core.order.service.type.OrderStatus;
 import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.Referenced;
+import org.broadleafcommerce.core.payment.service.BroadleafPaymentInfoTypeService;
 import org.broadleafcommerce.core.payment.service.PaymentInfoService;
 import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
@@ -72,6 +73,9 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     @Resource(name="blOrderService")
     protected OrderService orderService;
 
+    @Resource(name = "blPaymentInfoTypeService")
+    protected BroadleafPaymentInfoTypeService paymentInfoTypeService;
+
     @Override
     public Order findCartForCustomer(Map<String, String[]> responseMap) throws InvalidKeyException, NoSuchAlgorithmException {
         Result result = authorizeNetPaymentService.createResult(responseMap);
@@ -107,12 +111,12 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
 
     @Override
     public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException {
-         Map<PaymentInfo, Referenced> payments = new HashMap<PaymentInfo, Referenced>();
 
         //NOTE: assumes only one payment info of type credit card on the order.
         //Start by removing any payment info of type credit card already on the order.
         orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
 
+        Map<PaymentInfo, Referenced> payments = paymentInfoTypeService.getPaymentsMap(order);
         PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
         authorizeNetPaymentInfo.setOrder(order);
         authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
