@@ -34,15 +34,15 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author elbertbautista
@@ -85,8 +85,6 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
         if (order != null && !(order instanceof NullOrderImpl)) {
             try {
 
-                initializeOrderForCheckout(order);
-
                 CheckoutResponse checkoutResponse = authorizeNetCheckoutService.completeAuthorizeAndDebitCheckout(order, request.getParameterMap());
 
                 PaymentInfo authorizeNetPaymentInfo = null;
@@ -106,23 +104,15 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                     return authorizeNetCheckoutService.buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
                 }
                 
-                //payment response was unsuccessful; rollback
-                rollback = true;
             } catch (CheckoutException e) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Checkout Exception occurred processing Authorize.net relay response (params: [" + requestParamToString(request) + "])" + e);
                 }
-                //rollback for exception processing
-                rollback = true;
             }
         } else {
             if (LOG.isFatalEnabled()) {
                 LOG.fatal("The order could not be determined from the Authorize.net relay response (params: [" + requestParamToString(request) + "]). NOTE: The transaction may have completed successfully. Check your application keys and hash.");
             }
-        }
-        //Only process the failed order if it was initialized for submission in the first place
-        if (rollback) {
-            processFailedOrderCheckout(order);
         }
         
         return authorizeNetCheckoutService.buildRelayResponse(authorizeNetErrorUrl);
