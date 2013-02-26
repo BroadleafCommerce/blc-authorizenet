@@ -81,7 +81,6 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
     public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException {
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
-        boolean rollback = false;
         if (order != null && !(order instanceof NullOrderImpl)) {
             try {
 
