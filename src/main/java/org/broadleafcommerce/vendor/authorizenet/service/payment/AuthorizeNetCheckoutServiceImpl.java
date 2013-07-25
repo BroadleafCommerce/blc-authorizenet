@@ -120,7 +120,7 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
         authorizeNetPaymentInfo.setOrder(order);
         authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
-        authorizeNetPaymentInfo.setReferenceNumber(order.getOrderNumber());
+        authorizeNetPaymentInfo.setReferenceNumber(""+System.currentTimeMillis());
         authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
 
         //finally add the authorizenet payment info to the order
