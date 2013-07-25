@@ -34,15 +34,16 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Enumeration;
 import java.util.Map;
 import java.util.Set;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author elbertbautista
@@ -62,12 +63,24 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
     @Override
     public String checkout(HttpServletRequest request, HttpServletResponse response, Model model, RedirectAttributes redirectAttributes) {
+    	
+    	if (LOG.isTraceEnabled()) {
+	    	String headers = "";
+	    	Enumeration headerNames = request.getHeaderNames();
+	    	while (headerNames.hasMoreElements()) {
+	    		Object o = headerNames.nextElement();
+	    		headers += o.toString() + " : " + request.getHeader(o.toString()) + ", ";
+	    	}
+	    	LOG.trace("Authorize URL request Headers - " + headers);
+    	}
+    	
         Order order = CartState.getCart();
         if (!(order instanceof NullOrderImpl)) {
             try {
                 Map<String, String> formFields = authorizeNetCheckoutService.constructAuthorizeAndDebitFields(order);
                 for (String key :formFields.keySet()) {
                     model.addAttribute(key, formFields.get(key));
+                    LOG.debug("Checkout Form Field Parameter - " + key + " = " +formFields.get(key));
                 }
             } catch (NoSuchAlgorithmException e) {
                 LOG.error("Error Creating Authorize.net Checkout Form " + e);
@@ -81,13 +94,12 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
         return super.checkout(request, response, model, redirectAttributes);
     }
 
-    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException {
+    public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException, BroadleafAuthorizeNetException {
+    	LOG.debug("Authorize URL request - "+request.getRequestURL().toString());
+    	LOG.debug("Authorize Request Parameter Map (params: [" + requestParamToString(request) + "])");
         Order order = authorizeNetCheckoutService.findCartForCustomer(request.getParameterMap());
-        boolean rollback = false;
         if (order != null && !(order instanceof NullOrderImpl)) {
             try {
-
-                initializeOrderForCheckout(order);
 
                 CheckoutResponse checkoutResponse = authorizeNetCheckoutService.completeAuthorizeAndDebitCheckout(order, request.getParameterMap());
 
@@ -108,35 +120,28 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
                     return authorizeNetCheckoutService.buildRelayResponse(authorizeNetConfirmUrl + "/" + checkoutResponse.getOrder().getOrderNumber());
                 }
                 
-                //payment response was unsuccessful; rollback
-                rollback = true;
             } catch (CheckoutException e) {
                 if (LOG.isErrorEnabled()) {
                     LOG.error("Checkout Exception occurred processing Authorize.net relay response (params: [" + requestParamToString(request) + "])" + e);
                 }
-                //rollback for exception processing
-                rollback = true;
             }
         } else {
             if (LOG.isFatalEnabled()) {
                 LOG.fatal("The order could not be determined from the Authorize.net relay response (params: [" + requestParamToString(request) + "]). NOTE: The transaction may have completed successfully. Check your application keys and hash.");
+                throw new BroadleafAuthorizeNetException("Fatal Error has occured with in BroadleafAuthorizeNet");
             }
-        }
-        //Only process the failed order if it was initialized for submission in the first place
-        if (rollback) {
-            processFailedOrderCheckout(order);
         }
         
         return authorizeNetCheckoutService.buildRelayResponse(authorizeNetErrorUrl);
     }
 
 
-    private String requestParamToString(HttpServletRequest request) {
+    protected String requestParamToString(HttpServletRequest request) {
         StringBuffer requestMap = new StringBuffer();
         for (String key : (Set<String>)request.getParameterMap().keySet()) {
             requestMap.append(key + ": " + request.getParameter(key) + ", ");
         }
         return requestMap.toString();
     }
-
+    
 }
