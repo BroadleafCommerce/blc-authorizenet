@@ -31,6 +31,8 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
+import org.broadleafcommerce.common.extensibility.context.MergeClassPathXMLApplicationContext;
+import org.broadleafcommerce.common.extensibility.context.StandardConfigLocations;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.domain.OrderImpl;
@@ -53,12 +55,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import javax.annotation.Resource;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import java.io.IOException;
+import java.lang.management.ManagementFactory;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -66,11 +64,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Resource;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 /**
  *  @author elbertbautista
  *
  **/
 public class AuthorizeNetIntegrationTest extends BaseTest {
+
+    static {
+        moduleContexts.add("bl-authorizenet-applicationContext-test.xml");
+    }
 
     private static final Log LOG = LogFactory.getLog(AuthorizeNetIntegrationTest.class);
     public static final String BLC_CID = "blc_cid";
@@ -227,7 +234,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
             nameValuePairs.add(new BasicNameValuePair("x_country", "US"));
             nameValuePairs.add(new BasicNameValuePair("x_zip", "78704"));
             nameValuePairs.add(new BasicNameValuePair("x_email", "michael.jordan@broadleafcommerce.org"));
-            nameValuePairs.add(new BasicNameValuePair("x_card_num", "4111111111111111"));
+            nameValuePairs.add(new BasicNameValuePair("x_card_num", "4007000000027"));
             nameValuePairs.add(new BasicNameValuePair("x_exp_date", "0119"));
 
             httpPost.setEntity(new UrlEncodedFormEntity(nameValuePairs));

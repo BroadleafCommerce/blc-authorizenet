@@ -31,7 +31,7 @@ import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.service.PaymentContext;
 import org.broadleafcommerce.core.payment.service.exception.PaymentException;
-import org.broadleafcommerce.core.payment.service.module.PaymentModule;
+import org.broadleafcommerce.core.payment.service.module.AbstractModule;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoAdditionalFieldType;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.profile.core.domain.Address;
@@ -45,15 +45,15 @@ import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetPaymentService;
 import org.springframework.util.Assert;
 
-import javax.annotation.Resource;
-
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Resource;
 
 /**
  * @author elbertbautista
  */
-public class AuthorizeNetPaymentModule implements PaymentModule {
+public class AuthorizeNetPaymentModule extends AbstractModule {
 
     private static final Log LOG = LogFactory.getLog(AuthorizeNetPaymentModule.class);
 
@@ -69,22 +69,23 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     protected EntityConfiguration entityConfiguration;
 
     @Override
-    public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
-        return authorizeAndDebit(paymentContext);
-    }
-
-    @Override
-    public PaymentResponseItem reverseAuthorize(PaymentContext paymentContext) throws PaymentException {
+    public PaymentResponseItem processReverseAuthorize(PaymentContext paymentContext, Money amountToReverseAuthorize, PaymentResponseItem responseItem) throws PaymentException {
         throw new PaymentException("The reverseAuthorize method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
     }
 
     @Override
-    public PaymentResponseItem debit(PaymentContext paymentContext) throws PaymentException {
-        throw new PaymentException("The debit method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
+    public PaymentResponseItem processAuthorize(PaymentContext paymentContext, Money amountToAuthorize, PaymentResponseItem responseItem) throws PaymentException {
+        return authorizeAndDebit(paymentContext);
     }
 
     @Override
-    public PaymentResponseItem authorizeAndDebit(PaymentContext paymentContext) throws PaymentException {
+    public PaymentResponseItem processDebit(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
+        throw new PaymentException("The debit method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
+
+    }
+
+    @Override
+    public PaymentResponseItem processAuthorizeAndDebit(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
         if (LOG.isDebugEnabled()) {
             LOG.debug("Creating Payment Response for authorize and debit.");
         }
@@ -97,18 +98,25 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     }
 
     @Override
-    public PaymentResponseItem credit(PaymentContext paymentContext) throws PaymentException {
+    public PaymentResponseItem processCredit(PaymentContext paymentContext, Money amountToCredit, PaymentResponseItem responseItem) throws PaymentException {
         throw new PaymentException("The credit method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
+
     }
 
     @Override
-    public PaymentResponseItem voidPayment(PaymentContext paymentContext) throws PaymentException {
+    public PaymentResponseItem processVoidPayment(PaymentContext paymentContext, Money amountToVoid, PaymentResponseItem responseItem) throws PaymentException {
         throw new PaymentException("The voidPayment method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
     }
 
     @Override
-    public PaymentResponseItem balance(PaymentContext paymentContext) throws PaymentException {
+    public PaymentResponseItem processBalance(PaymentContext paymentContext, PaymentResponseItem responseItem) throws PaymentException {
         throw new PaymentException("The balance method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
+    }
+
+    @Override
+    public PaymentResponseItem processPartialPayment(PaymentContext paymentContext, Money amountToDebit, PaymentResponseItem responseItem) throws PaymentException {
+        // TODO Auto-generated method stub
+        return null;
     }
 
     protected PaymentResponseItem buildBasicDPMResponse(PaymentContext paymentContext) {
@@ -129,7 +137,7 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
-        responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()),paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));
+        responseItem.setTransactionAmount(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()), paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));
         responseItem.setProcessorResponseCode(result.getResponseCode().getCode() + "");
         responseItem.setProcessorResponseText(result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
         setPaymentResponseAdditionalFields(paymentContext, responseItem, result);
@@ -384,4 +392,5 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     public void setCustomerService(CustomerService customerService) {
         this.customerService = customerService;
     }
+
 }

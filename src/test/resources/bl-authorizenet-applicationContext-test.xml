@@ -2,29 +2,28 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:tx="http://www.springframework.org/schema/tx"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
            http://www.springframework.org/schema/context
-           http://www.springframework.org/schema/context/spring-context-3.2.xsd">
-
+           http://www.springframework.org/schema/context/spring-context-3.2.xsd
+           http://www.springframework.org/schema/tx
+           http://www.springframework.org/schema/tx/spring-tx-3.2.xsd">
 
     <context:component-scan base-package="org.broadleafcommerce.common.web"/>
     <context:component-scan base-package="org.broadleafcommerce.core.web"/>
     <context:component-scan base-package="org.broadleafcommerce.profile.web"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
+    <context:component-scan base-package="org.broadleafcommerce.cms.file"/>
 
-    <!-- In order to use the pre-configured properties files, you should override this bean yourself in your own applicationContext.xml -->
-    <!--
     <bean id="blConfiguration" class="org.broadleafcommerce.common.config.RuntimeEnvironmentPropertiesConfigurer">
         <property name="propertyLocations">
             <set>
-                <value>classpath:config/bc/authorizenet/</value>
+                <value>classpath:config/bc/override/</value>
             </set>
         </property>
     </bean>
-    -->
 
-    <!-- Override the default Broadleaf Credit Card Service with Authorize.net -->
     <bean id="blCreditCardService" class="org.broadleafcommerce.core.payment.service.PaymentServiceImpl">
         <property name="paymentModule" ref="blAuthorizeNetModule"/>
     </bean>
@@ -50,5 +49,7 @@
             </bean>
         </property>
     </bean>
+
+    <bean id="blUpdateCartServiceExtensionManager" class="org.broadleafcommerce.core.web.service.UpdateCartServiceExtensionManager" />
 
 </beans>
