@@ -250,7 +250,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug(responseBody);
                 LOG.debug("----------------------------------------");
             }
-
+            System.out.println(httpClient.getParams().toString());
             System.out.println(responseBody);
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
