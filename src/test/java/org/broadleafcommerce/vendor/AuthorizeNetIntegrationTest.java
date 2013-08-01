@@ -159,7 +159,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 response.setStatus(HttpServletResponse.SC_OK);
                 String responseBody = "";
 
-                System.out.println("Hi, I am the handler.");
+                System.out.println("**Hi, I am the handler**");
                 try {
                     Result result = paymentService.createResult(request.getParameterMap());
                     Long customerId = Long.parseLong(result.getResponseMap().get(BLC_CID));
@@ -189,8 +189,8 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
         Server server = new Server(Integer.parseInt(authorizeNetJettyIntegrationPort));
         server.setHandler(handler);
         server.start();
-        System.out.println("Jetty server started.");
-        this.wait();
+        System.out.println("**Jetty server started**");
+        Thread.sleep(100000);
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("*** Initiating testSuccessfulAuthorizenetAuthorizeAndDebit ***");
@@ -251,7 +251,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug("----------------------------------------");
             }
 
-            System.out.println("Post sent.");
+            System.out.println("**Post sent**");
             System.out.println(responseBody);
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
