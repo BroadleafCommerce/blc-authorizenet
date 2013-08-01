@@ -31,8 +31,6 @@ import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.HttpParams;
-import org.broadleafcommerce.common.extensibility.context.MergeClassPathXMLApplicationContext;
-import org.broadleafcommerce.common.extensibility.context.StandardConfigLocations;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.core.order.domain.Order;
 import org.broadleafcommerce.core.order.domain.OrderImpl;
@@ -56,7 +54,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.lang.management.ManagementFactory;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -162,6 +159,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 response.setStatus(HttpServletResponse.SC_OK);
                 String responseBody = "";
 
+                System.out.println("Hi, I am the handler.");
                 try {
                     Result result = paymentService.createResult(request.getParameterMap());
                     Long customerId = Long.parseLong(result.getResponseMap().get(BLC_CID));
@@ -191,6 +189,8 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
         Server server = new Server(Integer.parseInt(authorizeNetJettyIntegrationPort));
         server.setHandler(handler);
         server.start();
+        System.out.println("Jetty server started.");
+        this.wait();
 
         if (LOG.isDebugEnabled()) {
             LOG.debug("*** Initiating testSuccessfulAuthorizenetAuthorizeAndDebit ***");
@@ -251,6 +251,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug("----------------------------------------");
             }
 
+            System.out.println("Post sent.");
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
         } finally {
