@@ -18,7 +18,6 @@ package org.broadleafcommerce.vendor;
 
 import net.authorize.sim.Result;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -55,7 +54,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -168,9 +166,6 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                     String formTps = result.getResponseMap().get(BLC_TPS);
                     String tps = checkoutService.createTamperProofSeal(customerId, orderId);
 
-                    System.out.println(result.isAuthorizeNet());
-                    System.out.println(result.isApproved());
-                    System.out.println(requestParamToString(request));
                     if (result.isAuthorizeNet() && result.isApproved() && formTps.equals(tps)) {
                         responseBody = checkoutService.buildRelayResponse(authorizeNetConfirmUrl);
                     } else {
@@ -253,10 +248,6 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug("----------------------------------------");
             }
 
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(httpPost.getEntity().getContent(), writer);
-            System.out.println(writer.toString());
-            System.out.println(responseBody);
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
         } finally {
