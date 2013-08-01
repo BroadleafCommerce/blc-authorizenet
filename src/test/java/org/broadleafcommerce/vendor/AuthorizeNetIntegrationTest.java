@@ -168,7 +168,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
 
                     System.out.println(result.isAuthorizeNet());
                     System.out.println(result.isApproved());
-                    System.out.println(formTps);
+                    System.out.println(requestParamToString(request));
                     if (result.isAuthorizeNet() && result.isApproved() && formTps.equals(tps)) {
                         responseBody = checkoutService.buildRelayResponse(authorizeNetConfirmUrl);
                     } else {
@@ -250,7 +250,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug(responseBody);
                 LOG.debug("----------------------------------------");
             }
-            System.out.println(httpClient.getParams().toString());
+
             System.out.println(responseBody);
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
