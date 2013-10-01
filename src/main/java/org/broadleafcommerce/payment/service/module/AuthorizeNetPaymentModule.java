@@ -94,7 +94,7 @@ public class AuthorizeNetPaymentModule extends AbstractModule {
 
         Assert.isTrue(paymentInfo.getRequestParameterMap() != null && !paymentInfo.getRequestParameterMap().isEmpty(), "Must set the Request Parameter Map on the PaymentInfo instance.");
 
-        return buildBasicDPMResponse(paymentContext);
+        return buildBasicDPMResponse(paymentContext, responseItem);
     }
 
     @Override
@@ -119,7 +119,7 @@ public class AuthorizeNetPaymentModule extends AbstractModule {
         return null;
     }
 
-    protected PaymentResponseItem buildBasicDPMResponse(PaymentContext paymentContext) {
+    protected PaymentResponseItem buildBasicDPMResponse(PaymentContext paymentContext, PaymentResponseItem responseItem) {
         Result result = authorizeNetPaymentService.createResult(paymentContext.getPaymentInfo().getRequestParameterMap());
 
         if (LOG.isDebugEnabled()){
@@ -134,7 +134,6 @@ public class AuthorizeNetPaymentModule extends AbstractModule {
         setShippingInfo(paymentContext, result);
         setPaymentInfoAdditionalFields(paymentContext, result);
 
-        PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
         responseItem.setTransactionAmount(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()), paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));

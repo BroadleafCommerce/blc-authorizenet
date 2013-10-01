@@ -26,19 +26,14 @@ import org.broadleafcommerce.core.payment.domain.PaymentInfo;
 import org.broadleafcommerce.core.payment.domain.PaymentResponseItem;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.broadleafcommerce.core.pricing.service.exception.PricingException;
-import org.broadleafcommerce.core.web.controller.checkout.BroadleafCheckoutController;
-import org.broadleafcommerce.core.web.order.CartState;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetCheckoutService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.UnsupportedEncodingException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.Enumeration;
-import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -48,7 +43,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * @author elbertbautista
  */
-public class BroadleafAuthorizeNetController extends BroadleafCheckoutController {
+public class BroadleafAuthorizeNetController {
 
     private static final Log LOG = LogFactory.getLog(BroadleafAuthorizeNetController.class);
 
@@ -60,39 +55,6 @@ public class BroadleafAuthorizeNetController extends BroadleafCheckoutController
 
     @Value("${authorizenet.confirm.url}")
     protected String authorizeNetConfirmUrl;
-
-    @Override
-    public String checkout(HttpServletRequest request, HttpServletResponse response, Model model, RedirectAttributes redirectAttributes) {
-    	
-    	if (LOG.isTraceEnabled()) {
-	    	String headers = "";
-	    	Enumeration headerNames = request.getHeaderNames();
-	    	while (headerNames.hasMoreElements()) {
-	    		Object o = headerNames.nextElement();
-	    		headers += o.toString() + " : " + request.getHeader(o.toString()) + ", ";
-	    	}
-	    	LOG.trace("Authorize URL request Headers - " + headers);
-    	}
-    	
-        Order order = CartState.getCart();
-        if (!(order instanceof NullOrderImpl)) {
-            try {
-                Map<String, String> formFields = authorizeNetCheckoutService.constructAuthorizeAndDebitFields(order);
-                for (String key :formFields.keySet()) {
-                    model.addAttribute(key, formFields.get(key));
-                    LOG.debug("Checkout Form Field Parameter - " + key + " = " +formFields.get(key));
-                }
-            } catch (NoSuchAlgorithmException e) {
-                LOG.error("Error Creating Authorize.net Checkout Form " + e);
-            } catch (InvalidKeyException e) {
-                LOG.error("Error Creating Authorize.net Checkout Form " + e);
-            } catch (UnsupportedOperationException e) {
-                LOG.error("Error Creating Authorize.net Checkout Form " + e);
-            }
-        }
-
-        return super.checkout(request, response, model, redirectAttributes);
-    }
 
     public @ResponseBody String processAuthorizeNetAuthorizeAndDebit(HttpServletRequest request, HttpServletResponse response, Model model) throws NoSuchAlgorithmException, PricingException, InvalidKeyException, UnsupportedEncodingException, BroadleafAuthorizeNetException {
     	LOG.debug("Authorize URL request - "+request.getRequestURL().toString());
