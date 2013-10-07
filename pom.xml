@@ -63,11 +63,6 @@
     </developers>
     <repositories>
         <repository>
-            <id>third party</id>
-            <name>third party</name>
-            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/thirdparty/</url>
-        </repository>
-        <repository>
             <id>public releases</id>
             <name>public releases</name>
             <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/public/</url>
