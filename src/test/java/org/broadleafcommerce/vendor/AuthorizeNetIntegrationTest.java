@@ -18,7 +18,6 @@ package org.broadleafcommerce.vendor;
 
 import net.authorize.sim.Result;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.NameValuePair;
@@ -55,7 +54,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
@@ -156,7 +154,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                     LOG.debug("*** Authorize.net Parameters: ***");
                     LOG.debug(requestParamToString(request));
                 }
-                System.out.println("Hi.  I am the handler!!!!!!!!!!!!!");
+
                 response.setContentType("text/html");
                 response.setStatus(HttpServletResponse.SC_OK);
                 String responseBody = "";
@@ -249,10 +247,7 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
                 LOG.debug(responseBody);
                 LOG.debug("----------------------------------------");
             }
-            StringWriter writer = new StringWriter();
-            IOUtils.copy(httpPost.getEntity().getContent(), writer);
-            System.out.println(writer.toString());
-            System.out.println(responseBody);
+
             assert (responseBody.contains(authorizeNetConfirmUrl));
 
         } finally {
