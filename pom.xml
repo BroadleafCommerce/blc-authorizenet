@@ -324,6 +324,7 @@
             <type>jar</type>
             <classifier>tests</classifier>
             <scope>test</scope>
+            <optional>true</optional>
         </dependency>
         <dependency>
             <groupId>org.broadleafcommerce</groupId>
