@@ -50,6 +50,4 @@
         </property>
     </bean>
 
-    <bean id="blUpdateCartServiceExtensionManager" class="org.broadleafcommerce.core.web.service.UpdateCartServiceExtensionManager" />
-
 </beans>

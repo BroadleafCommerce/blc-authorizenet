@@ -23,6 +23,7 @@ import net.authorize.sim.Result;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.core.checkout.service.CheckoutService;
 import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
 import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
@@ -38,14 +39,15 @@ import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
 import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Resource;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
+
+import javax.annotation.Resource;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author elbertbautista
@@ -120,7 +122,8 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
         authorizeNetPaymentInfo.setOrder(order);
         authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
-        authorizeNetPaymentInfo.setReferenceNumber(""+System.currentTimeMillis());
+        authorizeNetPaymentInfo.setReferenceNumber(UUID.randomUUID().toString());
+        authorizeNetPaymentInfo.setAmount(new Money(responseMap.get(ResponseField.AMOUNT.getFieldName())[0]));
         authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
 
         //finally add the authorizenet payment info to the order
