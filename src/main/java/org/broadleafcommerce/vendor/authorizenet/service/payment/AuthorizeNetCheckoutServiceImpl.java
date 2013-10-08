@@ -146,6 +146,8 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
                 throw new UnsupportedOperationException(errorMessage);
             }
             
+            orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
+
             String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
             String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
             String relayResponseURL = authorizeNetPaymentService.getGatewayRequest().getRelayResponseUrl();
