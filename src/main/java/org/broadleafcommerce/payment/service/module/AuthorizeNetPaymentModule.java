@@ -136,10 +136,15 @@ public class AuthorizeNetPaymentModule extends AbstractModule {
 
         responseItem.setTransactionSuccess(isValidTransaction(result));
         responseItem.setTransactionTimestamp(SystemTime.asDate());
-        responseItem.setTransactionAmount(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()), paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));
         responseItem.setProcessorResponseCode(result.getResponseCode().getCode() + "");
         responseItem.setProcessorResponseText(result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
         setPaymentResponseAdditionalFields(paymentContext, responseItem, result);
+
+        if (isValidTransaction(result)) {
+            responseItem.setTransactionAmount(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()), paymentContext.getPaymentInfo().getOrder().getCurrency().getCurrencyCode()));
+        } else {
+            responseItem.setTransactionAmount(new Money(0));
+        }
 
         saveAnonymousCustomerInfo(paymentContext, responseItem, result);
 
