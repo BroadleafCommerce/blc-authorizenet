@@ -190,6 +190,8 @@ public class AuthorizeNetIntegrationTest extends BaseTest {
         Server server = new Server(Integer.parseInt(authorizeNetJettyIntegrationPort));
         server.setHandler(handler);
         server.start();
+        System.out.println("***Jetty Server started***");
+        System.out.println(server.isRunning());
         Thread.sleep(100000);
         if (LOG.isDebugEnabled()) {
             LOG.debug("*** Initiating testSuccessfulAuthorizenetAuthorizeAndDebit ***");
