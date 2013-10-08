@@ -97,10 +97,6 @@ public class BroadleafAuthorizeNetController {
         return authorizeNetCheckoutService.buildRelayResponse(authorizeNetErrorUrl);
     }
 
-    public String processAuthorizeNetError(HttpServletRequest request, HttpServletResponse response, Model model) {
-        return null;
-    }
-
     protected String requestParamToString(HttpServletRequest request) {
         StringBuffer requestMap = new StringBuffer();
         for (String key : (Set<String>)request.getParameterMap().keySet()) {
