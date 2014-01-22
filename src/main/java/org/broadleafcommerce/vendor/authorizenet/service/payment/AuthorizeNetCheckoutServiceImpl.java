@@ -16,38 +16,23 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.annotation.Resource;
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
 import net.authorize.ResponseField;
-import net.authorize.sim.Fingerprint;
 import net.authorize.sim.Result;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.core.checkout.service.CheckoutService;
-import org.broadleafcommerce.core.checkout.service.exception.CheckoutException;
-import org.broadleafcommerce.core.checkout.service.workflow.CheckoutResponse;
-import org.broadleafcommerce.core.order.domain.Order;
-import org.broadleafcommerce.core.order.service.OrderService;
-import org.broadleafcommerce.core.order.service.type.OrderStatus;
-import org.broadleafcommerce.core.payment.domain.CreditCardPaymentInfo;
-import org.broadleafcommerce.core.payment.domain.PaymentInfo;
-import org.broadleafcommerce.core.payment.domain.Referenced;
-import org.broadleafcommerce.core.payment.service.BroadleafPaymentInfoTypeService;
-import org.broadleafcommerce.core.payment.service.PaymentInfoService;
-import org.broadleafcommerce.core.payment.service.SecurePaymentInfoService;
-import org.broadleafcommerce.core.payment.service.type.PaymentInfoType;
+import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
 import org.springframework.stereotype.Service;
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.annotation.Resource;
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * @author elbertbautista
@@ -59,132 +44,13 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
     public static final String BLC_CID = "blc_cid";
     public static final String BLC_OID = "blc_oid";
     public static final String BLC_TPS = "blc_tps";
-
-    @Resource(name="blSecurePaymentInfoService")
-    protected SecurePaymentInfoService securePaymentInfoService;
-
-    @Resource(name="blPaymentInfoService")
-    protected PaymentInfoService paymentInfoService;
-
-    @Resource(name = "blAuthorizeNetVendorOrientedPaymentService")
-    protected AuthorizeNetPaymentService authorizeNetPaymentService;
-
-    @Resource(name="blCheckoutService")
-    protected CheckoutService checkoutService;
-
-    @Resource(name="blOrderService")
-    protected OrderService orderService;
-
-    @Resource(name = "blPaymentInfoTypeService")
-    protected BroadleafPaymentInfoTypeService paymentInfoTypeService;
+    
+    @Resource(name = "blAuthorizeNetConfiguration")
+    protected AuthorizeNetConfiguration configuration;
 
     @Override
-    public Order findCartForCustomer(Map<String, String[]> responseMap) throws InvalidKeyException, NoSuchAlgorithmException {
-        Result result = authorizeNetPaymentService.createResult(responseMap);
-
-        if (LOG.isDebugEnabled()) {
-            LOG.debug("Result Reason Text - " + result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
-        }
-
-        if (result.isAuthorizeNet()){
-            Long customerId = Long.parseLong(result.getResponseMap().get(BLC_CID));
-            Long orderId = Long.parseLong(result.getResponseMap().get(BLC_OID));
-            String formTps = result.getResponseMap().get(BLC_TPS);
-            String tps = createTamperProofSeal(customerId, orderId);
-
-            if (LOG.isDebugEnabled()) {
-                LOG.debug("Customer ID - " + customerId);
-                LOG.debug("Order ID - " + orderId);
-                LOG.debug("Form tps - " + formTps);
-                LOG.debug("tps - " + tps);
-            }
-
-            if (tps.equals(formTps)) {
-                Order order = orderService.findOrderById(orderId);
-                if (order != null && order.getCustomer().getId().equals(customerId)
-                        && OrderStatus.IN_PROCESS.equals(order.getStatus())) {
-                    return order;
-                }
-            }
-        }
-
-        return null;
-    }
-
-    @Override
-    public CheckoutResponse completeAuthorizeAndDebitCheckout(Order order, Map<String, String[]> responseMap) throws CheckoutException {
-
-        //NOTE: assumes only one payment info of type credit card on the order.
-        //Start by removing any payment info of type credit card already on the order.
-        orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
-
-        Map<PaymentInfo, Referenced> payments = paymentInfoTypeService.getPaymentsMap(order);
-        PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
-        authorizeNetPaymentInfo.setOrder(order);
-        authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
-        authorizeNetPaymentInfo.setReferenceNumber(UUID.randomUUID().toString());
-        authorizeNetPaymentInfo.setAmount(new Money(responseMap.get(ResponseField.AMOUNT.getFieldName())[0]));
-        authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
-
-        //finally add the authorizenet payment info to the order
-        order.getPaymentInfos().add(authorizeNetPaymentInfo);
-
-        CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
-        creditCardPaymentInfo.setReferenceNumber(authorizeNetPaymentInfo.getReferenceNumber());
-        payments.put(authorizeNetPaymentInfo, creditCardPaymentInfo);
-
-        return checkoutService.performCheckout(order, payments);
-    }
-
-    @Override
-    public Map<String, String> constructAuthorizeAndDebitFields(Order order) throws InvalidKeyException, NoSuchAlgorithmException, UnsupportedOperationException {
-        if (order != null) {
-            
-            if (order.getCurrency() != null && !order.getCurrency().getCurrencyCode().equals("USD")) {
-                String errorMessage = "Only USD currency is accepted by Authorize.net. Currency ("+ order.getCurrency().getCurrencyCode() + ") not supported";
-                LOG.error(errorMessage);
-                throw new UnsupportedOperationException(errorMessage);
-            }
-            
-            orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
-
-            String apiLoginId = authorizeNetPaymentService.getGatewayRequest().getApiLoginId();
-            String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
-            String relayResponseURL = authorizeNetPaymentService.getGatewayRequest().getRelayResponseUrl();
-            String merchantTransactionVersion = authorizeNetPaymentService.getGatewayRequest().getMerchantTransactionVersion();
-            String xTestRequest = authorizeNetPaymentService.getGatewayRequest().getxTestRequest();
-            String serverUrl = authorizeNetPaymentService.getGatewayRequest().getServerUrl();
-
-            Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), order.getRemainingTotal().toString());
-            Map<String, String> formFields = new HashMap<String, String>();
-            formFields.put("x_invoice_num", System.currentTimeMillis()+"");
-            formFields.put("x_relay_url", relayResponseURL);
-            formFields.put("x_login", apiLoginId);
-            formFields.put("x_fp_sequence", fingerprint.getSequence()+"");
-            formFields.put("x_fp_timestamp", fingerprint.getTimeStamp()+"");
-            formFields.put("x_fp_hash", fingerprint.getFingerprintHash());
-            formFields.put("x_version", merchantTransactionVersion);
-            formFields.put("x_method", "CC");
-            formFields.put("x_type", "AUTH_CAPTURE");
-            formFields.put("x_amount", order.getRemainingTotal().toString());
-            formFields.put("x_test_request", xTestRequest);
-
-            formFields.put(BLC_CID, order.getCustomer().getId().toString());
-            formFields.put(BLC_OID, order.getId().toString());
-            formFields.put(BLC_TPS, createTamperProofSeal(order.getCustomer().getId(), order.getId()));
-
-            formFields.put("authorizenet_server_url", serverUrl);
-
-            return formFields;
-        } else {
-            LOG.warn("Order is null");   
-        }
-
-        return null;
-    }
-
-    @Override
-    public String buildRelayResponse (String receiptUrl) {
+    public String buildRelayResponse (String receiptUrl, Result result) {
+        receiptUrl = addParams(receiptUrl, result);
         StringBuffer response = new StringBuffer();
         response.append("<!DOCTYPE html PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\"\n \"http://www.w3.org/TR/html4/loose.dtd\">");
         response.append("<html>");
@@ -208,15 +74,68 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         return response.toString();
     }
 
+    private String addParams(String receiptUrl, Result result) {
+        StringBuffer receiptUrlBuffer = new StringBuffer(receiptUrl);
+
+        try {
+          if(result != null) {
+            receiptUrlBuffer.append("?");
+            receiptUrlBuffer.append("notes").append("=").append(result.getResponseMap().get("notes"));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.TRANSACTION_TYPE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_TYPE.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.RESPONSE_CODE.getFieldName()).append("=").append(result.getResponseCode().getCode());
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.RESPONSE_REASON_CODE.getFieldName()).append("=").append(result.getReasonResponseCode().getResponseReasonCode());
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.RESPONSE_REASON_TEXT.getFieldName()).append("=");
+            String responseText = result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName());
+            receiptUrlBuffer.append(responseText!=null?URLEncoder.encode(responseText, "UTF-8"):responseText);
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.TRANSACTION_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_ID.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.FIRST_NAME.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.FIRST_NAME.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.LAST_NAME.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.LAST_NAME.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.CUSTOMER_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CUSTOMER_ID.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.ADDRESS.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ADDRESS.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.CITY.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CITY.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.STATE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.STATE.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.ZIP_CODE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ZIP_CODE.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.COUNTRY.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.COUNTRY.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.PHONE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.PHONE.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.ACCOUNT_NUMBER.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ACCOUNT_NUMBER.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(ResponseField.CARD_TYPE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CARD_TYPE.getFieldName()));
+            
+            
+
+            if(result.isApproved()) {
+              receiptUrlBuffer.append("&").append(ResponseField.TRANSACTION_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_ID.getFieldName()));
+            }
+          }
+        } catch (UnsupportedEncodingException e) { }
+
+        return receiptUrlBuffer.toString();
+}
+
     @Override
-    public String createTamperProofSeal(Long customerId, Long orderId) throws NoSuchAlgorithmException, InvalidKeyException {
-        String transactionKey = authorizeNetPaymentService.getGatewayRequest().getTransactionKey();
+    public String createTamperProofSeal(String customerId, String orderId) throws NoSuchAlgorithmException, InvalidKeyException {
+        String transactionKey = configuration.getTransactionKey();
 
         Base64 encoder = new Base64();
         Mac sha1Mac = Mac.getInstance("HmacSHA1");
         SecretKeySpec publicKeySpec = new SecretKeySpec(transactionKey.getBytes(), "HmacSHA1");
         sha1Mac.init(publicKeySpec);
-        String customerOrderString = customerId.toString() + orderId.toString();
+        String customerOrderString = customerId + orderId;
         byte[] publicBytes = sha1Mac.doFinal(customerOrderString.getBytes());
         String publicDigest = encoder.encodeToString(publicBytes);
         return publicDigest.replaceAll("\\r|\\n", "");
