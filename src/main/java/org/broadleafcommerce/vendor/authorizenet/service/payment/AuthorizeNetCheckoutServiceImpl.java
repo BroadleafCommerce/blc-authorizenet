@@ -32,7 +32,6 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
-import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
 
 /**
@@ -81,47 +80,20 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         try {
           if(result != null) {
             receiptUrlBuffer.append("?");
-            receiptUrlBuffer.append("notes").append("=").append(result.getResponseMap().get("notes"));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.TRANSACTION_TYPE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_TYPE.getFieldName()));
-            receiptUrlBuffer.append("&");
             receiptUrlBuffer.append(ResponseField.RESPONSE_CODE.getFieldName()).append("=").append(result.getResponseCode().getCode());
             receiptUrlBuffer.append("&");
             receiptUrlBuffer.append(ResponseField.RESPONSE_REASON_CODE.getFieldName()).append("=").append(result.getReasonResponseCode().getResponseReasonCode());
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.RESPONSE_REASON_TEXT.getFieldName()).append("=");
-            String responseText = result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName());
-            receiptUrlBuffer.append(responseText!=null?URLEncoder.encode(responseText, "UTF-8"):responseText);
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.TRANSACTION_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_ID.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.FIRST_NAME.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.FIRST_NAME.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.LAST_NAME.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.LAST_NAME.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.CUSTOMER_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CUSTOMER_ID.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.ADDRESS.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ADDRESS.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.CITY.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CITY.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.STATE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.STATE.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.ZIP_CODE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ZIP_CODE.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.COUNTRY.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.COUNTRY.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.PHONE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.PHONE.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.ACCOUNT_NUMBER.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ACCOUNT_NUMBER.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(ResponseField.CARD_TYPE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CARD_TYPE.getFieldName()));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(MessageConstants.BLC_OID).append("=").append(result.getResponseMap().get(MessageConstants.BLC_OID));
-            receiptUrlBuffer.append("&");
-            receiptUrlBuffer.append(MessageConstants.REQ_AMOUNT).append("=").append(result.getResponseMap().get(MessageConstants.REQ_AMOUNT));
             
-            
+            for(String fieldKey : result.getResponseMap().keySet()) {
+                receiptUrlBuffer.append("&");
+                receiptUrlBuffer.append(fieldKey).append("=");
+                if(fieldKey.equals(ResponseField.RESPONSE_REASON_TEXT.getFieldName())) {
+                    String responseText = result.getResponseMap().get(fieldKey);
+                    receiptUrlBuffer.append(responseText!=null?URLEncoder.encode(responseText, "UTF-8"):responseText);
+                } else {
+                    receiptUrlBuffer.append(result.getResponseMap().get(fieldKey));
+                }
+            }
 
             if(result.isApproved()) {
               receiptUrlBuffer.append("&").append(ResponseField.TRANSACTION_ID.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.TRANSACTION_ID.getFieldName()));
@@ -144,7 +116,6 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
         byte[] publicBytes = sha1Mac.doFinal(customerOrderString.getBytes());
         String publicDigest = encoder.encodeToString(publicBytes);
         return publicDigest.replaceAll("\\r|\\n", "");
-
     }
 
 }

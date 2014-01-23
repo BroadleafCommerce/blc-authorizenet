@@ -31,6 +31,7 @@ import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetChe
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
 
 /**
  * @author Chad Harchar (charchar)
@@ -58,15 +59,10 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
     }
 
     public PaymentResponseDTO common(PaymentRequestDTO requestDTO, Boolean submitForSettlement) {
-//        if (order != null) {
-//            
-//            if (order.getCurrency() != null && !order.getCurrency().getCurrencyCode().equals("USD")) {
-//                String errorMessage = "Only USD currency is accepted by Authorize.net. Currency ("+ order.getCurrency().getCurrencyCode() + ") not supported";
-//                //LOG.error(errorMessage);
-//                throw new UnsupportedOperationException(errorMessage);
-//            }
-        
-        //orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
+        Assert.isTrue(requestDTO.getOrderId() != null,
+                "Must pass an OrderId value on the Payment Request DTO");
+        Assert.isTrue(requestDTO.getTransactionTotal() != null,
+                "Must pass a Transaction Total value on the Payment Request DTO");
 
         String apiLoginId = configuration.getLoginId();
         String transactionKey = configuration.getTransactionKey();
@@ -89,7 +85,6 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
         .responseMap(MessageConstants.X_METHOD, "CC")
         .responseMap(MessageConstants.X_TYPE, submitForSettlement ? AUTH_CAPTURE : AUTH_ONLY)
         .responseMap(MessageConstants.X_AMOUNT, requestDTO.getTransactionTotal())
-        .responseMap(MessageConstants.REQ_AMOUNT, requestDTO.getTransactionTotal())
         .responseMap(MessageConstants.X_TEST_REQUEST, xTestRequest)
         .responseMap(MessageConstants.X_RELAY_RESPONSE, "true")
         .responseMap(MessageConstants.BLC_CID, custId)
@@ -97,7 +92,7 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
         .responseMap(MessageConstants.X_CUST_ID, custId)
         .responseMap(MessageConstants.X_TRANS_ID, orderId)
         .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, serverUrl);
-        
+
         if(requestDTO.billToPopulated()) {
             responseDTO.responseMap(MessageConstants.X_FIRST_NAME, requestDTO.getBillTo().getAddressFirstName())
             .responseMap(MessageConstants.X_LAST_NAME, requestDTO.getBillTo().getAddressLastName())
@@ -110,14 +105,16 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
             .responseMap(MessageConstants.X_PHONE, requestDTO.getBillTo().getAddressPhone());
             
         }
-        
+
+        for(String fieldKey : requestDTO.getAdditionalFields().keySet()) {
+            responseDTO.responseMap(fieldKey, (String)requestDTO.getAdditionalFields().get(fieldKey));
+        }
+
         try {
             responseDTO.responseMap(MessageConstants.BLC_TPS, authorizeNetCheckoutService.createTamperProofSeal(custId, orderId));
         } catch (InvalidKeyException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         } catch (NoSuchAlgorithmException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 

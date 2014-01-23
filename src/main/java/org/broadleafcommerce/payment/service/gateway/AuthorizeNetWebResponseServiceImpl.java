@@ -80,8 +80,8 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         Map<String, String> params = responseDTO.getResponseMap();
 
         Money amount = Money.ZERO;
-        if (responseDTO.getResponseMap().containsKey(MessageConstants.REQ_AMOUNT)) {
-            String amt = responseDTO.getResponseMap().get(MessageConstants.REQ_AMOUNT);
+        if (responseDTO.getResponseMap().containsKey(MessageConstants.X_AMOUNT)) {
+            String amt = responseDTO.getResponseMap().get(MessageConstants.X_AMOUNT);
             amount = new Money(amt);
         }
 
