@@ -67,47 +67,47 @@ Broadleaf allows you to create your own property files per environment (e.g. com
 You will need to enter the following key/value pairs in the appropriate locations:
 
 ### common.properties
-    authorizenet.merchant.transaction.version=3.1
+    gateway.authorizenet.transactionVersion=3.1
 
 ### local.properties, development.properties, integrationdev.properties, integrationqa.properties
-    authorizenet.api.login.id=?
-    authorizenet.transaction.key=?
-    authorizenet.merchant.md5.key=?   
-    authorizenet.relay.response.url=? (e.g. http://localhost:8080/authorizenet/process)
-    authorizenet.confirm.url=? (e.g. http://localhost:8080/confirmation)
-    authorizenet.error.url=? (e.g. http://localhost:8080/authorizenet/error)
-    authorizenet.server.url=https://test.authorize.net/gateway/transact.dll
-    authorizenet.x_test_request=FALSE
+    gateway.authorizenet.loginId=?
+    gateway.authorizenet.transactionKey=?
+    gateway.authorizenet.merchantMd5Key=?   
+    gateway.authorizenet.responseUrl=? (e.g. http://localhost:8080/authorizenet/process)
+    gateway.authorizenet.confirmUrl=? (e.g. http://localhost:8080/confirmation)
+    gateway.authorizenet.errorUrl=? (e.g. http://localhost:8080/authorizenet/error)
+    gateway.authorizenet.serverUrl=https://test.authorize.net/gateway/transact.dll
+    gateway.authorizenet.xTestRequest=FALSE
 
-- authorizenet.relay.response.url: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.responseUrll: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
     
 ### staging.properties
-    authorizenet.api.login.id=?
-    authorizenet.transaction.key=?
-    authorizenet.merchant.md5.key=?    
-    authorizenet.relay.response.url=? (e.g. http://staging.mycompany.com/authorizenet/process)
-    authorizenet.confirm.url=? (e.g. http://staging.mycompany.com/confirmation)
-    authorizenet.error.url=? (e.g. http://staging.mycompany.com/authorizenet/error)
-    authorizenet.server.url=https://secure.authorize.net/gateway/transact.dll
-    authorizenet.x_test_request=TRUE   
+    gateway.authorizenet.loginId=?
+    gateway.authorizenet.transactionKey=?
+    gateway.authorizenet.merchantMd5Key=?   
+    gateway.authorizenet.responseUrl=? (e.g. http://staging.mycompany.com/authorizenet/process)
+    gateway.authorizenet.confirmUrl=? (e.g. http://staging.mycompany.com/confirmation)
+    gateway.authorizenet.errorUrl=? (e.g. http://staging.mycompany.com/authorizenet/error)
+    gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
+    gateway.authorizenet.xTestRequest=TRUE
 
-- authorizenet.relay.response.url: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
-- authorizenet.x_text_request: Once the integration is successfully tested in the developer test environment,
+- gateway.authorizenet.responseUrll: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.xTestRequest: Once the integration is successfully tested in the developer test environment,
 the merchant’s Authorize.Net Payment Gateway API Login ID and Transaction Key can be plugged into the integration for testing against the live environment.
 By including the x_test_request field with a value of “TRUE” in the HTML Form POST <INPUT TYPE="HIDDEN" NAME="x_test_request" VALUE="TRUE">
 
 ### production.properties 
-    authorizenet.api.login.id=?
-    authorizenet.transaction.key=?
-    authorizenet.merchant.md5.key=?
-    authorizenet.relay.response.url=? (e.g. http://mycompany.com/authorizenet/process)
-    authorizenet.confirm.url=? (e.g. http://mycompany.com/confirmation)
-    authorizenet.error.url=? (e.g. http://mycompany.com/authorizenet/error)
-    authorizenet.server.url=https://secure.authorize.net/gateway/transact.dll
-    authorizenet.x_test_request=FALSE 
+    gateway.authorizenet.loginId=?
+    gateway.authorizenet.transactionKey=?
+    gateway.authorizenet.merchantMd5Key=?   
+    gateway.authorizenet.responseUrl=? (e.g. http://mycompany.com/authorizenet/process)
+    gateway.authorizenet.confirmUrl=? (e.g. http://mycompany.com/confirmation)
+    gateway.authorizenet.errorUrl=? (e.g. http://mycompany.com/authorizenet/error)
+    gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
+    gateway.authorizenet.xTestRequest=FALSE
 
-- authorizenet.relay.response.url: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
-- authorizenet.x_test_request: Only needed for testing in a live environment, e.g. staging
+- gateway.authorizenet.responseUrll: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.xTestRequest: Only needed for testing in a live environment, e.g. staging
 
 
-Now that you have your environment set up, let's begin setting up the [[Authorize.net Module]].
+Now that you have your environment set up, let's begin setting up the [[Authorize.net Quick Start]].
