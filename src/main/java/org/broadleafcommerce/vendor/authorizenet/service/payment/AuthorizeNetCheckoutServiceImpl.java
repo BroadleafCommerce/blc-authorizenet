@@ -32,6 +32,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
+import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
 
 /**
@@ -115,6 +116,10 @@ public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutServ
             receiptUrlBuffer.append(ResponseField.ACCOUNT_NUMBER.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.ACCOUNT_NUMBER.getFieldName()));
             receiptUrlBuffer.append("&");
             receiptUrlBuffer.append(ResponseField.CARD_TYPE.getFieldName()).append("=").append(result.getResponseMap().get(ResponseField.CARD_TYPE.getFieldName()));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(MessageConstants.BLC_OID).append("=").append(result.getResponseMap().get(MessageConstants.BLC_OID));
+            receiptUrlBuffer.append("&");
+            receiptUrlBuffer.append(MessageConstants.REQ_AMOUNT).append("=").append(result.getResponseMap().get(MessageConstants.REQ_AMOUNT));
             
             
 

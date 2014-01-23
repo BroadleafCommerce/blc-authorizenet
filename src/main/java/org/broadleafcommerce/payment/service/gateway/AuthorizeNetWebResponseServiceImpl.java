@@ -80,8 +80,8 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         Map<String, String> params = responseDTO.getResponseMap();
 
         Money amount = Money.ZERO;
-        if (responseDTO.getResponseMap().containsKey(MessageConstants.X_AMOUNT)) {
-            String amt = responseDTO.getResponseMap().get(MessageConstants.X_AMOUNT);
+        if (responseDTO.getResponseMap().containsKey(MessageConstants.REQ_AMOUNT)) {
+            String amt = responseDTO.getResponseMap().get(MessageConstants.REQ_AMOUNT);
             amount = new Money(amt);
         }
 
@@ -89,9 +89,6 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         if (params.get(MessageConstants.X_RESPONSE_CODE).equals("1")) {
             approved = true;
         }
-        System.out.println(params.get(MessageConstants.X_RESPONSE_CODE));
-        System.out.println(params.get(MessageConstants.X_RESPONSE_CODE).equals("1"));
-        System.out.println(approved);
 
         PaymentTransactionType type = PaymentTransactionType.AUTHORIZE_AND_CAPTURE;
         if (!configuration.isPerformAuthorizeAndCapture()) {
@@ -101,11 +98,11 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         responseDTO.successful(approved)
         .amount(amount)
         .paymentTransactionType(type)
-        .orderId(params.get(MessageConstants.X_TRANS_ID))
+        .orderId(params.get(MessageConstants.BLC_OID))
         .customer()
             .firstName(params.get(MessageConstants.X_FIRST_NAME))
             .lastName(params.get(MessageConstants.X_LAST_NAME))
-            .customerId(MessageConstants.X_CUST_ID)
+            .customerId(params.get(MessageConstants.X_CUST_ID))
             .done()
         .billTo()
             .addressFirstName(params.get(MessageConstants.X_FIRST_NAME))
@@ -123,6 +120,5 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
 
         return responseDTO;
     }
-    
 
 }

@@ -34,47 +34,42 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
     public String getLoginId() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.loginId");
     }
-    
+
     @Override
     public String getTransactionKey() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.transactionKey");
     }
-    
+
     @Override
     public String getMd5Key() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.merchantMd5Key");
     }
-    
+
     @Override
     public String getTransactionVersion() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.transactionVersion");
     }
-    
-    @Override
-    public String getIntegrationPort() {
-        return BLCSystemProperty.resolveSystemProperty("authorizenet.jetty.integration.port");
-    }
-    
+
     @Override
     public String getResponseUrl() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.responseUrl");
     }
-    
+
     @Override
     public String getConfirmUrl() {
-        return BLCSystemProperty.resolveSystemProperty("authorizenet.confirm.url");
+        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.confirmUrl");
     }
-    
+
     @Override
     public String getErrorUrl() {
-        return BLCSystemProperty.resolveSystemProperty("authorizenet.error.url");
+        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.errorUrl");
     }
-    
+
     @Override
     public String getServerUrl() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.serverUrl");
     }
-    
+
     @Override
     public String getXTestRequest() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.xTestRequest");

@@ -61,4 +61,5 @@ public class MessageConstants {
     public static final String X_CARD_NUM = "x_card_num";
     public static final String X_EXP_DATE = "x_exp_date";
     public static final String X_CARD_CODE = "x_card_code";
+    public static final String REQ_AMOUNT = "req_amount";
 }

@@ -30,8 +30,6 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
 
     public String getTransactionVersion();
 
-    public String getIntegrationPort();
-
     public String getResponseUrl();
 
     public String getConfirmUrl();

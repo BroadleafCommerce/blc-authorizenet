@@ -89,10 +89,13 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
         .responseMap(MessageConstants.X_METHOD, "CC")
         .responseMap(MessageConstants.X_TYPE, submitForSettlement ? AUTH_CAPTURE : AUTH_ONLY)
         .responseMap(MessageConstants.X_AMOUNT, requestDTO.getTransactionTotal())
+        .responseMap(MessageConstants.REQ_AMOUNT, requestDTO.getTransactionTotal())
         .responseMap(MessageConstants.X_TEST_REQUEST, xTestRequest)
         .responseMap(MessageConstants.X_RELAY_RESPONSE, "true")
         .responseMap(MessageConstants.BLC_CID, custId)
         .responseMap(MessageConstants.BLC_OID, orderId)
+        .responseMap(MessageConstants.X_CUST_ID, custId)
+        .responseMap(MessageConstants.X_TRANS_ID, orderId)
         .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, serverUrl);
         
         if(requestDTO.billToPopulated()) {
