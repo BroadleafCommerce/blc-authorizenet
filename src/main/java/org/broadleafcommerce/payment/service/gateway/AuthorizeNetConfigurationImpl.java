@@ -102,8 +102,7 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
 
     @Override
     public boolean handlesCapture() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
@@ -113,20 +112,17 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
 
     @Override
     public boolean handlesReverseAuthorize() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean handlesVoid() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
     public boolean handlesRefund() {
-        // TODO Auto-generated method stub
-        return false;
+        return true;
     }
 
     @Override
@@ -143,7 +139,8 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
 
     @Override
     public boolean handlesRecurringPayment() {
-        return true;
+        // TODO Auto-generated method stub
+        return false;
     }
 
     @Override

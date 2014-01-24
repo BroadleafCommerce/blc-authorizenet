@@ -20,6 +20,8 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import net.authorize.AuthNetField;
+
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -45,32 +47,9 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
 
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
-      //NOTE: assumes only one payment info of type credit card on the order.
-        //Start by removing any payment info of type credit card already on the order.
-        //orderService.removePaymentsFromOrder(order, PaymentInfoType.CREDIT_CARD);
-
-//        Map<PaymentInfo, Referenced> payments = paymentInfoTypeService.getPaymentsMap(order);
-//        PaymentInfo authorizeNetPaymentInfo = paymentInfoService.create();
-//        authorizeNetPaymentInfo.setOrder(order);
-//        authorizeNetPaymentInfo.setType(PaymentInfoType.CREDIT_CARD);
-//        authorizeNetPaymentInfo.setReferenceNumber(UUID.randomUUID().toString());
-//        authorizeNetPaymentInfo.setAmount(new Money(responseMap.get(ResponseField.AMOUNT.getFieldName())[0]));
-//        authorizeNetPaymentInfo.setRequestParameterMap(responseMap);
-//
-//        //finally add the authorizenet payment info to the order
-//        order.getPaymentInfos().add(authorizeNetPaymentInfo);
-//
-//        CreditCardPaymentInfo creditCardPaymentInfo = ((CreditCardPaymentInfo) securePaymentInfoService.create(PaymentInfoType.CREDIT_CARD));
-//        creditCardPaymentInfo.setReferenceNumber(authorizeNetPaymentInfo.getReferenceNumber());
-//        payments.put(authorizeNetPaymentInfo, creditCardPaymentInfo);
-        System.out.println("request: " + request);
-        System.out.println("requestmap: " + webResponsePrintService.printRequest(request));
-        
-        
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD,
                 AuthorizeNetGatewayType.AUTHORIZENET)
                 .rawResponse(webResponsePrintService.printRequest(request));
-//                .valid(verifySignature(request));
 
         Map<String,String[]> paramMap = request.getParameterMap();
         for (String key : paramMap.keySet())  {
@@ -80,13 +59,13 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         Map<String, String> params = responseDTO.getResponseMap();
 
         Money amount = Money.ZERO;
-        if (responseDTO.getResponseMap().containsKey(MessageConstants.X_AMOUNT)) {
-            String amt = responseDTO.getResponseMap().get(MessageConstants.X_AMOUNT);
+        if (responseDTO.getResponseMap().containsKey(AuthNetField.X_AMOUNT.getFieldName())) {
+            String amt = responseDTO.getResponseMap().get(AuthNetField.X_AMOUNT.getFieldName());
             amount = new Money(amt);
         }
 
         boolean approved = false;
-        if (params.get(MessageConstants.X_RESPONSE_CODE).equals("1")) {
+        if (params.get(AuthNetField.X_RESPONSE_CODE.getFieldName()).equals("1")) {
             approved = true;
         }
 
@@ -94,29 +73,29 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         if (!configuration.isPerformAuthorizeAndCapture()) {
             type = PaymentTransactionType.AUTHORIZE;
         }
-        
+
         responseDTO.successful(approved)
         .amount(amount)
         .paymentTransactionType(type)
         .orderId(params.get(MessageConstants.BLC_OID))
         .customer()
-            .firstName(params.get(MessageConstants.X_FIRST_NAME))
-            .lastName(params.get(MessageConstants.X_LAST_NAME))
-            .customerId(params.get(MessageConstants.X_CUST_ID))
+            .firstName(params.get(AuthNetField.X_FIRST_NAME.getFieldName()))
+            .lastName(params.get(AuthNetField.X_LAST_NAME.getFieldName()))
+            .customerId(params.get(AuthNetField.X_CUST_ID.getFieldName()))
             .done()
         .billTo()
-            .addressFirstName(params.get(MessageConstants.X_FIRST_NAME))
-            .addressLastName(params.get(MessageConstants.X_LAST_NAME))
-            .addressLine1(params.get(MessageConstants.X_ADDRESS))
-            .addressCityLocality(params.get(MessageConstants.X_CITY))
-            .addressStateRegion(params.get(MessageConstants.X_STATE))
-            .addressPostalCode(params.get(MessageConstants.X_ZIP))
-            .addressCountryCode(params.get(MessageConstants.X_COUNTRY))
-            .addressPhone(params.get(MessageConstants.X_PHONE))
+            .addressFirstName(params.get(AuthNetField.X_FIRST_NAME.getFieldName()))
+            .addressLastName(params.get(AuthNetField.X_LAST_NAME.getFieldName()))
+            .addressLine1(params.get(AuthNetField.X_ADDRESS.getFieldName()))
+            .addressCityLocality(params.get(AuthNetField.X_CITY.getFieldName()))
+            .addressStateRegion(params.get(AuthNetField.X_STATE.getFieldName()))
+            .addressPostalCode(params.get(AuthNetField.X_ZIP.getFieldName()))
+            .addressCountryCode(params.get(AuthNetField.X_COUNTRY.getFieldName()))
+            .addressPhone(params.get(AuthNetField.X_PHONE.getFieldName()))
             .done()
         .creditCard()
-            .creditCardLastFour(params.get(MessageConstants.X_ACCOUNT_NUMBER))
-            .creditCardType(params.get(MessageConstants.X_CARD_TYPE));
+            .creditCardLastFour(params.get(AuthNetField.X_ACCOUNT_NUMBER.getFieldName()))
+            .creditCardType(params.get(AuthNetField.X_CARD_TYPE.getFieldName()));
 
         return responseDTO;
     }

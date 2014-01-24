@@ -28,6 +28,7 @@ import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import net.authorize.AuthNetField;
 import net.authorize.sim.Result;
 
 import org.apache.commons.logging.Log;
@@ -147,7 +148,7 @@ public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractContr
         System.out.println("requestmap: " + webResponsePrintService.printRequest(request));
         if (approved && responseDTO.isValid()){
             if (LOG.isDebugEnabled()) {
-                LOG.debug("Transaction success for order " + result.getResponseMap().get(MessageConstants.X_TRANS_ID));
+                LOG.debug("Transaction success for order " + result.getResponseMap().get(AuthNetField.X_TRANS_ID.getFieldName()));
                 LOG.debug("Response for Authorize.net to relay to client: ");
                 LOG.debug(authorizeNetCheckoutService.buildRelayResponse(configuration.getConfirmUrl(), result));
             }

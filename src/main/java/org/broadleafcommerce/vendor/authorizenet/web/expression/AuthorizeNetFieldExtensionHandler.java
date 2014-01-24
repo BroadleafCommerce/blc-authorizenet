@@ -16,13 +16,14 @@
 
 package org.broadleafcommerce.vendor.authorizenet.web.expression;
 
-import org.broadleafcommerce.common.web.payment.expression.AbstractPaymentGatewayFieldExtensionHandler;
-import org.broadleafcommerce.common.web.payment.expression.PaymentGatewayFieldExtensionManager;
-import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
-import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+
+import net.authorize.AuthNetField;
+
+import org.broadleafcommerce.common.web.payment.expression.AbstractPaymentGatewayFieldExtensionHandler;
+import org.broadleafcommerce.common.web.payment.expression.PaymentGatewayFieldExtensionManager;
+import org.springframework.stereotype.Service;
 
 /**
  * @author Chad Harchar (charchar)
@@ -52,12 +53,12 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
 
     @Override
     public String getCreditCardNum() {
-        return MessageConstants.X_CARD_NUM;
+        return AuthNetField.X_CARD_NUM.getFieldName();
     }
 
     @Override
     public String getCreditCardExpDate() {
-        return MessageConstants.X_EXP_DATE;
+        return AuthNetField.X_EXP_DATE.getFieldName();
     }
 
     @Override
@@ -72,27 +73,27 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
 
     @Override
     public String getCreditCardCvv() {
-        return MessageConstants.X_CARD_CODE;
+        return AuthNetField.X_CARD_CODE.getFieldName();
     }
 
     @Override
     public String getBillToAddressFirstName() {
-        return MessageConstants.X_FIRST_NAME;
+        return AuthNetField.X_FIRST_NAME.getFieldName();
     }
 
     @Override
     public String getBillToAddressLastName() {
-        return MessageConstants.X_LAST_NAME;
+        return AuthNetField.X_LAST_NAME.getFieldName();
     }
 
     @Override
     public String getBillToAddressCompanyName() {
-        return MessageConstants.X_COMPANY;
+        return AuthNetField.X_COMPANY.getFieldName();
     }
 
     @Override
     public String getBillToAddressLine1() {
-        return MessageConstants.X_ADDRESS;
+        return AuthNetField.X_ADDRESS.getFieldName();
     }
 
     @Override
@@ -102,52 +103,52 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
 
     @Override
     public String getBillToAddressCityLocality() {
-        return MessageConstants.X_CITY;
+        return AuthNetField.X_CITY.getFieldName();
     }
 
     @Override
     public String getBillToAddressStateRegion() {
-        return MessageConstants.X_STATE;
+        return AuthNetField.X_STATE.getFieldName();
     }
 
     @Override
     public String getBillToAddressPostalCode() {
-        return MessageConstants.X_ZIP;
+        return AuthNetField.X_ZIP.getFieldName();
     }
 
     @Override
     public String getBillToAddressCountryCode() {
-        return MessageConstants.X_COUNTRY;
+        return AuthNetField.X_COUNTRY.getFieldName();
     }
 
     @Override
     public String getBillToAddressPhone() {
-        return MessageConstants.X_PHONE;
+        return AuthNetField.X_PHONE.getFieldName();
     }
 
     @Override
     public String getBillToAddressEmail() {
-        return MessageConstants.X_EMAIL;
+        return AuthNetField.X_EMAIL.getFieldName();
     }
 
     @Override
     public String getShipToAddressFirstName() {
-        return MessageConstants.X_SHIP_TO_FIRST_NAME;
+        return AuthNetField.X_SHIP_TO_FIRST_NAME.getFieldName();
     }
 
     @Override
     public String getShipToAddressLastName() {
-        return MessageConstants.X_SHIP_TO_LAST_NAME;
+        return AuthNetField.X_SHIP_TO_LAST_NAME.getFieldName();
     }
 
     @Override
     public String getShipToAddressCompanyName() {
-        return MessageConstants.X_SHIP_TO_COMPANY;
+        return AuthNetField.X_SHIP_TO_COMPANY.getFieldName();
     }
 
     @Override
     public String getShipToAddressLine1() {
-        return MessageConstants.X_SHIP_TO_ADDRESS;
+        return AuthNetField.X_SHIP_TO_ADDRESS.getFieldName();
     }
 
     @Override
@@ -157,22 +158,22 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
 
     @Override
     public String getShipToAddressCityLocality() {
-        return MessageConstants.X_SHIP_TO_CITY;
+        return AuthNetField.X_SHIP_TO_CITY.getFieldName();
     }
 
     @Override
     public String getShipToAddressStateRegion() {
-        return MessageConstants.X_SHIP_TO_STATE;
+        return AuthNetField.X_SHIP_TO_STATE.getFieldName();
     }
 
     @Override
     public String getShipToAddressPostalCode() {
-        return MessageConstants.X_SHIP_TO_ZIP;
+        return AuthNetField.X_SHIP_TO_ZIP.getFieldName();
     }
 
     @Override
     public String getShipToAddressCountryCode() {
-        return MessageConstants.X_SHIP_TO_COUNTRY;
+        return AuthNetField.X_SHIP_TO_COUNTRY.getFieldName();
     }
 
     @Override

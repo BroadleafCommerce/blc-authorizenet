@@ -44,7 +44,7 @@ public class AuthorizeNetConfigurationServiceImpl implements PaymentGatewayConfi
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;
 
-    //TODO
+    @Resource(name = "blAuthorizeNetTransactionService")
     protected PaymentGatewayTransactionService transactionService;
 
     //TODO

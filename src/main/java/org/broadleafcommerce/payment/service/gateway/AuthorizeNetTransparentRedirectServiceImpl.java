@@ -20,6 +20,7 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.Resource;
 
+import net.authorize.AuthNetField;
 import net.authorize.sim.Fingerprint;
 
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -75,34 +76,34 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
 
         Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), requestDTO.getTransactionTotal());
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET)
-        .responseMap(MessageConstants.X_INVOICE_NUM, System.currentTimeMillis()+"")
-        .responseMap(MessageConstants.X_RELAY_URL, relayResponseURL)
-        .responseMap(MessageConstants.X_LOGIN, apiLoginId)
-        .responseMap(MessageConstants.X_FP_SEQUENCE, fingerprint.getSequence()+"")
-        .responseMap(MessageConstants.X_FP_TIMESTAMP, fingerprint.getTimeStamp()+"")
-        .responseMap(MessageConstants.X_FP_HASH, fingerprint.getFingerprintHash())
-        .responseMap(MessageConstants.X_VERSION, merchantTransactionVersion)
-        .responseMap(MessageConstants.X_METHOD, "CC")
-        .responseMap(MessageConstants.X_TYPE, submitForSettlement ? AUTH_CAPTURE : AUTH_ONLY)
-        .responseMap(MessageConstants.X_AMOUNT, requestDTO.getTransactionTotal())
-        .responseMap(MessageConstants.X_TEST_REQUEST, xTestRequest)
-        .responseMap(MessageConstants.X_RELAY_RESPONSE, "true")
+        .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), System.currentTimeMillis()+"")
+        .responseMap(AuthNetField.X_RELAY_URL.getFieldName(), relayResponseURL)
+        .responseMap(AuthNetField.X_LOGIN.getFieldName(), apiLoginId)
+        .responseMap(AuthNetField.X_FP_SEQUENCE.getFieldName(), fingerprint.getSequence()+"")
+        .responseMap(AuthNetField.X_FP_TIMESTAMP.getFieldName(), fingerprint.getTimeStamp()+"")
+        .responseMap(AuthNetField.X_FP_HASH.getFieldName(), fingerprint.getFingerprintHash())
+        .responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), merchantTransactionVersion)
+        .responseMap(AuthNetField.X_METHOD.getFieldName(), "CC")
+        .responseMap(AuthNetField.X_TYPE.getFieldName(), submitForSettlement ? AUTH_CAPTURE : AUTH_ONLY)
+        .responseMap(AuthNetField.X_AMOUNT.getFieldName(), requestDTO.getTransactionTotal())
+        .responseMap(AuthNetField.X_TEST_REQUEST.getFieldName(), xTestRequest)
+        .responseMap(AuthNetField.X_RELAY_RESPONSE.getFieldName(), "true")
+        .responseMap(AuthNetField.X_CUST_ID.getFieldName(), custId)
+        .responseMap(AuthNetField.X_TRANS_ID.getFieldName(), orderId)
         .responseMap(MessageConstants.BLC_CID, custId)
         .responseMap(MessageConstants.BLC_OID, orderId)
-        .responseMap(MessageConstants.X_CUST_ID, custId)
-        .responseMap(MessageConstants.X_TRANS_ID, orderId)
         .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, serverUrl);
 
         if(requestDTO.billToPopulated()) {
-            responseDTO.responseMap(MessageConstants.X_FIRST_NAME, requestDTO.getBillTo().getAddressFirstName())
-            .responseMap(MessageConstants.X_LAST_NAME, requestDTO.getBillTo().getAddressLastName())
-            .responseMap(MessageConstants.X_ADDRESS, requestDTO.getBillTo().getAddressLine1())
-            .responseMap(MessageConstants.X_CITY, requestDTO.getBillTo().getAddressCityLocality())
-            .responseMap(MessageConstants.X_STATE, requestDTO.getBillTo().getAddressStateRegion())
-            .responseMap(MessageConstants.X_ZIP, requestDTO.getBillTo().getAddressPostalCode())
-            .responseMap(MessageConstants.X_COUNTRY, requestDTO.getBillTo().getAddressCountryCode())
-            .responseMap(MessageConstants.X_EMAIL, requestDTO.getBillTo().getAddressEmail() != null ? requestDTO.getBillTo().getAddressEmail() : requestDTO.getCustomer().getEmail())
-            .responseMap(MessageConstants.X_PHONE, requestDTO.getBillTo().getAddressPhone());
+            responseDTO.responseMap(AuthNetField.X_FIRST_NAME.getFieldName(), requestDTO.getBillTo().getAddressFirstName())
+            .responseMap(AuthNetField.X_LAST_NAME.getFieldName(), requestDTO.getBillTo().getAddressLastName())
+            .responseMap(AuthNetField.X_ADDRESS.getFieldName(), requestDTO.getBillTo().getAddressLine1())
+            .responseMap(AuthNetField.X_CITY.getFieldName(), requestDTO.getBillTo().getAddressCityLocality())
+            .responseMap(AuthNetField.X_STATE.getFieldName(), requestDTO.getBillTo().getAddressStateRegion())
+            .responseMap(AuthNetField.X_ZIP.getFieldName(), requestDTO.getBillTo().getAddressPostalCode())
+            .responseMap(AuthNetField.X_COUNTRY.getFieldName(), requestDTO.getBillTo().getAddressCountryCode())
+            .responseMap(AuthNetField.X_EMAIL.getFieldName(), requestDTO.getBillTo().getAddressEmail() != null ? requestDTO.getBillTo().getAddressEmail() : requestDTO.getCustomer().getEmail())
+            .responseMap(AuthNetField.X_PHONE.getFieldName(), requestDTO.getBillTo().getAddressPhone());
             
         }
 
