@@ -127,31 +127,26 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
 
     @Override
     public boolean handlesPartialCapture() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean handlesMultipleShipment() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean handlesRecurringPayment() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean handlesSavedCustomerPayment() {
-        // TODO Auto-generated method stub
         return false;
     }
 
     @Override
     public boolean handlesMultiplePayments() {
-        // TODO Auto-generated method stub
         return false;
     }
 

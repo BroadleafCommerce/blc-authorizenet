@@ -17,7 +17,6 @@ public class AuthorizeNetRollbackServiceImpl implements PaymentGatewayRollbackSe
     
     @Override
     public PaymentResponseDTO rollbackAuthorize(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
-    System.out.println("hi");
         return transactionService.voidPayment(transactionToBeRolledBack);
     }
 
@@ -29,13 +28,12 @@ public class AuthorizeNetRollbackServiceImpl implements PaymentGatewayRollbackSe
     @Override
     public PaymentResponseDTO rollbackAuthorizeAndCapture(PaymentRequestDTO transactionToBeRolledBack)
             throws PaymentException {
-            System.out.println("hi");
         return transactionService.voidPayment(transactionToBeRolledBack);
     }
 
     @Override
     public PaymentResponseDTO rollbackRefund(PaymentRequestDTO transactionToBeRolledBack) throws PaymentException {
-        throw new PaymentException("The Rollback Refund method is not supported for this module");
+        return transactionService.voidPayment(transactionToBeRolledBack);
     }
 
 }
