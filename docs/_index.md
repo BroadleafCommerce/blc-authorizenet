@@ -1,8 +1,10 @@
 # Authorize.net Module
 
-Broadleaf Commerce currently offers integration with Authorize.net. This module uses the DPM integration method outlined here:  [http://developer.authorize.net/api/dpm/](http://developer.authorize.net/api/dpm/)
+Broadleaf Commerce currently offers integration with Authorize.net. This module uses DPM and AIM methods.
 
-![Authorize.net Diagram](payment-authorizenet-diagram.png)
+DPM integration outlined here: http://developer.authorize.net/api/dpm/
+
+![Authorize.net DPM Diagram](payment-authorizenet-diagram.png)
 
 ## How It Works
 1. On the final checkout page, the customer fills out their credit card and billing information and hits submit. This form will POST directly to Authorize.net with the required information contained within hidden fields and regular form fields.
@@ -12,5 +14,11 @@ Broadleaf Commerce currently offers integration with Authorize.net. This module 
 4. Authorize.net will take that response and relay it to the customer's browser.
 5. Upon receiving that response, the customer's browser will redirect to the appropriate page.
 6. Broadleaf will serve either a confirmation or error page based on the requested URL.
+
+
+AIM integration outlined here: http://developer.authorize.net/api/aim/
+
+![Authorize.net AIM Diagram](payment-authorizenet-aim-diagram.png)
+
 
 To get started integrating the Authorize.net module into your web application, checkout [[Authorize.net Environment Setup].
