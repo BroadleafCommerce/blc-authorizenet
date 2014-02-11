@@ -59,3 +59,5 @@ with
 
 ## Done!
 At this point, all the configuration should be complete and you are now ready to test your integration with Authorize.net. Add something to your cart and proceed with checkout.
+
+> Note: When checking out, make sure that your credit card expiration date is in the form of MM-YYYY.
