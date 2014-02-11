@@ -8,11 +8,12 @@
 ### Configure your Authorize.net Account*
 1. Login to your Authorize.net account (https://account.authorize.net/ or https://sandbox.authorize.net/) and navigate to your Account Settings.
 ![Authorize.net Console](payment-authorizenet-console-1.png)
-2. Create a new Transaction Key by navigating to Account > Settings > API Login ID and Transaction Key. Fill out the form to generate a new key
+2. Check your email to find the default Secret Answer that will be asigned to you. You can change this by going into Account > User Profile > Change Security Question and Answer
+3. Create a new Transaction Key by navigating to Account > Settings > API Login ID and Transaction Key. Fill out the form to generate a new key
 ![Authorize.net Console](payment-authorizenet-console-2.png)
-3. Create an MD5Hash (e.g. 12345) by navigating to Account > Settings > MD5Hash
+4. Create an MD5Hash (e.g. 12345) by navigating to Account > Settings > MD5Hash
 ![Authorize.net Console](payment-authorizenet-console-3.png)
-4. Finally, configure the Relay Response URL by navigating to Account > Settings > Response/Receipt URLs. This is the public URL that Authorize.net will send the response of the transaction to.
+5. Finally, configure the Relay Response URL by navigating to Account > Settings > Response/Receipt URLs. This is the public URL that Authorize.net will send the response of the transaction to.
 ![Authorize.net Console](payment-authorizenet-console-4.png)
 
 > * Note all of these values down as you will need to enter them in your environment properties files.
