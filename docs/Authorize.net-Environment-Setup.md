@@ -42,7 +42,7 @@ Next, include both the Authorize.net Java SDK and the Broadleaf Authorize.net Mo
 <dependency>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-authorizenet</artifactId>
-    <version>${blc.thirdparty.version}</version>
+    <version>2.4.0-GA</version>
     <type>jar</type>
     <scope>compile</scope>
 </dependency>
