@@ -74,13 +74,13 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.loginId=?
     gateway.authorizenet.transactionKey=?
     gateway.authorizenet.merchantMd5Key=?   
-    gateway.authorizenet.responseUrl=? (e.g. http://localhost:8080/authorizenet/process)
+    gateway.authorizenet.responseUrl=? (e.g. Publicly accessible URL ending with /authorizenet/process)
     gateway.authorizenet.confirmUrl=? (e.g. http://localhost:8080/confirmation)
     gateway.authorizenet.errorUrl=? (e.g. http://localhost:8080/authorizenet/error)
     gateway.authorizenet.serverUrl=https://test.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=FALSE
 
-- gateway.authorizenet.responseUrl: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.responseUrl: must be a publicly accessible URL. We recommend using [Ngrok](https://ngrok.com/) to setup a temporary publicly accessible URL.
     
 ### staging.properties
     gateway.authorizenet.loginId=?
@@ -92,7 +92,7 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=TRUE
 
-- gateway.authorizenet.responseUrl: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.responseUrl: must be a publicly accessible URL. 
 - gateway.authorizenet.xTestRequest: Once the integration is successfully tested in the developer test environment,
 the merchant’s Authorize.Net Payment Gateway API Login ID and Transaction Key can be plugged into the integration for testing against the live environment.
 By including the x_test_request field with a value of “TRUE” in the HTML Form POST <INPUT TYPE="HIDDEN" NAME="x_test_request" VALUE="TRUE">
@@ -107,7 +107,7 @@ By including the x_test_request field with a value of “TRUE” in the HTML For
     gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=FALSE
 
-- gateway.authorizenet.responseUrl: must be a publicly accessible URL. See [[Testing using DPM | http://community.developer.authorize.net/t5/Integration-and-Testing/Direct-Post-in-a-development-environment-behind-a-firewall/td-p/8906]] for more details; This is must be the same value you entered in your account settings.
+- gateway.authorizenet.responseUrl: must be a publicly accessible URL. 
 - gateway.authorizenet.xTestRequest: Only needed for testing in a live environment, e.g. staging
 
 
