@@ -27,7 +27,7 @@ with
 with
 
 ```xml
-    <!-- Cybersource Secure Acceptance SOP -->
+    <!-- Scan for Authorize.net -->
     <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
 
