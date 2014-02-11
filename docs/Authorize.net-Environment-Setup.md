@@ -76,7 +76,7 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.transactionKey=?
     gateway.authorizenet.merchantMd5Key=?   
     gateway.authorizenet.responseUrl=? (e.g. Publicly accessible URL ending with /authorizenet/process)
-    gateway.authorizenet.confirmUrl=? (e.g. http://localhost:8080/confirmation)
+    gateway.authorizenet.confirmUrl=? (e.g. http://localhost:8080/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://localhost:8080/authorizenet/error)
     gateway.authorizenet.serverUrl=https://test.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=FALSE
@@ -88,7 +88,7 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.transactionKey=?
     gateway.authorizenet.merchantMd5Key=?   
     gateway.authorizenet.responseUrl=? (e.g. http://staging.mycompany.com/authorizenet/process)
-    gateway.authorizenet.confirmUrl=? (e.g. http://staging.mycompany.com/confirmation)
+    gateway.authorizenet.confirmUrl=? (e.g. http://staging.mycompany.com/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://staging.mycompany.com/authorizenet/error)
     gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=TRUE
@@ -103,7 +103,7 @@ By including the x_test_request field with a value of “TRUE” in the HTML For
     gateway.authorizenet.transactionKey=?
     gateway.authorizenet.merchantMd5Key=?   
     gateway.authorizenet.responseUrl=? (e.g. http://mycompany.com/authorizenet/process)
-    gateway.authorizenet.confirmUrl=? (e.g. http://mycompany.com/confirmation)
+    gateway.authorizenet.confirmUrl=? (e.g. http://mycompany.com/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://mycompany.com/authorizenet/error)
     gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=FALSE
