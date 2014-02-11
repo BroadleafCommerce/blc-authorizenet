@@ -22,4 +22,4 @@ AIM integration outlined here: http://developer.authorize.net/api/aim/
 ![Authorize.net AIM Diagram](payment-authorizenet-aim-diagram.png)
 
 
-To get started integrating the Authorize.net module into your web application, checkout [[Authorize.net Environment Setup].
+To get started integrating the Authorize.net module into your web application, checkout [[Authorize.net Environment Setup]].
