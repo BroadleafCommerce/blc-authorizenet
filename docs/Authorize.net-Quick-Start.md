@@ -56,3 +56,5 @@ with
 At this point, all the configuration should be complete and you are now ready to test your integration with Authorize.net. Add something to your cart and proceed with checkout.
 
 > Note: When checking out, make sure that your credit card expiration date is in the form of MM-YYYY.
+
+> Note: To view transactions, go to the [Authorize.net Sandbox](https://sandbox.authorize.net/) and click on "Search" at the top.  You can view both settled and unsettled transactions this way.
