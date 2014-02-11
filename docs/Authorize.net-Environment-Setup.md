@@ -4,6 +4,7 @@
 
 - Users must establish their own test account with Authorize.net in order to use the BroadleafCommerce Authorize.net payment functionality. This can be done here: https://developer.authorize.net/testaccount
 - Please familiarize yourself with the Direct Post Method of the Authorize.net API before proceeding: https://developer.authorize.net/integration/fifteenminutes/java
+- Must have a publicly accessible URL ending with /authorizenet/process for local testing environments.  We recommend using [Ngrok](https://ngrok.com/) to setup a temporary publicly accessible URL.  This will be the URL set on Step 5 below and in your gateway.authorizenet.responseUrl property of your development.properties file.
 
 ### Configure your Authorize.net Account*
 1. Login to your Authorize.net account (https://account.authorize.net/ or https://sandbox.authorize.net/) and navigate to your Account Settings.
@@ -47,7 +48,7 @@ Next, include both the Authorize.net Java SDK and the Broadleaf Authorize.net Mo
     <scope>compile</scope>
 </dependency>
 ```
-Make sure to include the dependency in your site pom.xml as well:
+Make sure to include the dependency in your CORE pom.xml as well:
 
 ```xml
 <!-- Authorize.net Dependencies -->
