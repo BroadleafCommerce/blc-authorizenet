@@ -4,13 +4,7 @@ Broadleaf Commerce offers an out-of-the-box Authorize.net solution that requires
 
 **You must have completed the [[Authorize.net Environment Setup]] before continuing**
 
-1. In your `applicationContext-servlet.xml`, replace the component scan
-
-```xml
-    <context:component-scan base-package="com.mycompany.sample" />
-```
-
-with
+1. In your `applicationContext-servlet.xml`, add the component scan
 
 ```xml
     <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
@@ -30,6 +24,7 @@ with
     <!-- Scan for Authorize.net -->
     <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
     <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
+    <bean class="org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType"/>
 
     <!-- Add Sample Thymeleaf Processor to test Hosted Payment Gateway (e.g. PayPal Express Flow) -->
     <bean id="mySampleConfigurationServices" class="org.springframework.beans.factory.config.ListFactoryBean">
