@@ -75,7 +75,7 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.loginId=?
     gateway.authorizenet.transactionKey=?
     gateway.authorizenet.merchantMd5Key=?   
-    gateway.authorizenet.responseUrl=? (e.g. Publicly accessible URL ending with /authorizenet/process)
+    gateway.authorizenet.responseUrl=? (e.g. http://xxxxx.ngrok.com/authorizenet/process)
     gateway.authorizenet.confirmUrl=? (e.g. http://localhost:8080/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://localhost:8080/authorizenet/error)
     gateway.authorizenet.serverUrl=https://test.authorize.net/gateway/transact.dll
