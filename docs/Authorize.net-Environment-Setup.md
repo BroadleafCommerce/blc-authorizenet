@@ -19,31 +19,12 @@
 
 > * Note all of these values down as you will need to enter them in your environment properties files.
 
-### Download and Install the Authorize.net Java SDK
-The Authorize.net SDK is not available on any public maven repository, so you must download and install it manually.
-You can do that here: https://developer.authorize.net/downloads/
-
-Once downloaded, you can install this dependency into your local or shared maven repository
-```java
-mvn install:install-file -Dfile=anet-java-sdk-1.4.6.jar -DgroupId=net.authorize -DartifactId=anet-java-sdk -Dversion=1.4.6 -Dpackaging=jar
-```
-Alternatively, you can install it in a nexus proxy that the local development build is configured to point to.
-
-Next, include both the Authorize.net Java SDK and the Broadleaf Authorize.net Module dependency to your pom.xml.
-
 ```xml
 <!-- Authorize.net Dependencies -->
 <dependency>
-    <groupId>net.authorize</groupId>
-    <artifactId>anet-java-sdk</artifactId>
-    <version>1.4.6</version>
-    <type>jar</type>
-    <scope>compile</scope>
-</dependency>
-<dependency>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-authorizenet</artifactId>
-    <version>2.4.0-GA</version>
+    <version>2.5.0-GA</version>
     <type>jar</type>
     <scope>compile</scope>
 </dependency>
@@ -52,10 +33,6 @@ Make sure to include the dependency in your CORE pom.xml as well:
 
 ```xml
 <!-- Authorize.net Dependencies -->
-<dependency>
-    <groupId>net.authorize</groupId>
-    <artifactId>anet-java-sdk</artifactId>
-</dependency>
 <dependency>
     <groupId>org.broadleafcommerce</groupId>
     <artifactId>broadleaf-authorizenet</artifactId>
