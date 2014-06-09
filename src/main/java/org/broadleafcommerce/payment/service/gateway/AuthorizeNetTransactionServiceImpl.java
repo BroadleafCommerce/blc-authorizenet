@@ -32,6 +32,8 @@ import net.authorize.aim.Result;
 import net.authorize.aim.Transaction;
 import net.authorize.data.creditcard.CreditCard;
 
+import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
@@ -52,7 +54,7 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
 
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        return common(paymentRequestDTO, TransactionType.AUTH_ONLY);
+        return common(paymentRequestDTO, TransactionType.AUTH_ONLY, PaymentTransactionType.AUTHORIZE);
     }
 
     @Override
@@ -61,12 +63,12 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
                 "Must pass 'x_trans_id' value on the additionalFields of the Payment Request DTO");
         Assert.isTrue(paymentRequestDTO.getTransactionTotal() != null,
                 "The Transaction Total must not be null on the Payment Request DTO");
-        return common(paymentRequestDTO, TransactionType.PRIOR_AUTH_CAPTURE);
+        return common(paymentRequestDTO, TransactionType.PRIOR_AUTH_CAPTURE, PaymentTransactionType.CAPTURE);
     }
 
     @Override
     public PaymentResponseDTO authorizeAndCapture(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
-        return common(paymentRequestDTO, TransactionType.AUTH_CAPTURE);
+        return common(paymentRequestDTO, TransactionType.AUTH_CAPTURE, PaymentTransactionType.AUTHORIZE_AND_CAPTURE);
     }
 
     @Override
@@ -84,17 +86,17 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
                 (paymentRequestDTO.getCreditCard().getCreditCardLastFour() != null || paymentRequestDTO.getCreditCard().getCreditCardNum() != null);
         Assert.isTrue(cardNumOrLastFourPopulated || (paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_CARD_NUM.getFieldName()) != null),
                 "Must pass the Last four card number digits on the credit card of the Payment Request DTO");
-        return common(paymentRequestDTO, TransactionType.CREDIT);
+        return common(paymentRequestDTO, TransactionType.CREDIT, PaymentTransactionType.REFUND);
     }
 
     @Override
     public PaymentResponseDTO voidPayment(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
         Assert.isTrue(paymentRequestDTO.getAdditionalFields().containsKey(AuthNetField.X_TRANS_ID.getFieldName()),
                 "Must pass 'x_trans_id' value on the additionalFields of the Payment Request DTO");
-        return common(paymentRequestDTO, TransactionType.VOID);
+        return common(paymentRequestDTO, TransactionType.VOID, PaymentTransactionType.VOID);
     }
     
-    private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType) {
+    private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
         Environment e = Environment.createEnvironment(configuration.getServerUrl(), configuration.getServerUrl().replace("test", "apitest").replace("secure", "api"));
         Merchant merchant = Merchant.createMerchant(e, configuration.getLoginId(), configuration.getTransactionKey());
         
@@ -133,12 +135,17 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
           merchant.postTransaction(transaction);
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
+        responseDTO.paymentTransactionType(paymentTransactionType);
+        responseDTO.rawResponse(result.getTarget().toNVPString());
+        responseDTO.amount(new Money(result.getTarget().getResponseField(ResponseField.AMOUNT)));
         responseDTO.orderId(result.getTarget().getMerchantDefinedField(MessageConstants.BLC_OID));
         responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
         responseDTO.responseMap(ResponseField.RESPONSE_CODE.getFieldName(), ""+result.getResponseCode().getCode());
         responseDTO.responseMap(ResponseField.RESPONSE_REASON_CODE.getFieldName(), ""+result.getReasonResponseCode().getResponseReasonCode());
         responseDTO.responseMap(ResponseField.RESPONSE_REASON_TEXT.getFieldName(), result.getResponseText());
         responseDTO.responseMap(ResponseField.TRANSACTION_TYPE.getFieldName(), result.getTarget().getTransactionType().getValue());
+        responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), result.getTarget().getResponseField(ResponseField.AMOUNT));
+
         responseDTO.successful(result.isApproved());
         if(result.isError()) {
             responseDTO.valid(false);
