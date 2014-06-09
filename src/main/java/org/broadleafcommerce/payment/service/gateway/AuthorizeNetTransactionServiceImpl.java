@@ -145,6 +145,7 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
         responseDTO.responseMap(ResponseField.RESPONSE_REASON_TEXT.getFieldName(), result.getResponseText());
         responseDTO.responseMap(ResponseField.TRANSACTION_TYPE.getFieldName(), result.getTarget().getTransactionType().getValue());
         responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), result.getTarget().getResponseField(ResponseField.AMOUNT));
+        responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), result.getTarget().getAuthorizationCode());
 
         responseDTO.successful(result.isApproved());
         if(result.isError()) {
