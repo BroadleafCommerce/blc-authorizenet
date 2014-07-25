@@ -146,7 +146,6 @@ public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractContr
         String tps = authorizeNetCheckoutService.createTamperProofSeal(result.getResponseMap().get(MessageConstants.BLC_CID), result.getResponseMap().get(MessageConstants.BLC_OID));
         responseDTO.valid(tps.equals(result.getResponseMap().get(MessageConstants.BLC_TPS)));
         
-        System.out.println("requestmap: " + webResponsePrintService.printRequest(request));
         if (approved && responseDTO.isValid()){
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Transaction success for order " + result.getResponseMap().get(AuthNetField.X_TRANS_ID.getFieldName()));

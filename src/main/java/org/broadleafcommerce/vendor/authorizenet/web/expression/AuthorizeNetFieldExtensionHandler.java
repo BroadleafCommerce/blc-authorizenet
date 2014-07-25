@@ -25,8 +25,10 @@ import javax.annotation.Resource;
 
 import net.authorize.AuthNetField;
 
+import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.web.payment.expression.AbstractPaymentGatewayFieldExtensionHandler;
 import org.broadleafcommerce.common.web.payment.expression.PaymentGatewayFieldExtensionManager;
+import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
 import org.springframework.stereotype.Service;
 
 /**
@@ -37,6 +39,9 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
 
     @Resource(name = "blPaymentGatewayFieldExtensionManager")
     protected PaymentGatewayFieldExtensionManager extensionManager;
+
+    @Resource(name = "blAuthorizeNetConfiguration")
+    protected AuthorizeNetConfiguration configuration;
 
     @PostConstruct
     public void init() {
@@ -188,5 +193,10 @@ public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFie
     @Override
     public String getShipToAddressEmail() {
         return null;
+    }
+
+    @Override
+    public PaymentGatewayType getHandlerType() {
+        return configuration.getGatewayType();
     }
 }
