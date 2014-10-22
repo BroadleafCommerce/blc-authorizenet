@@ -19,10 +19,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import java.math.BigDecimal;
-
-import javax.annotation.Resource;
-
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
 import net.authorize.Merchant;
@@ -44,6 +40,10 @@ import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGat
 import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.math.BigDecimal;
+
+import javax.annotation.Resource;
 
 
 @Service("blAuthorizeNetTransactionService")
@@ -131,12 +131,11 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
             transaction.setCreditCard(creditCard);
         }
 
-        Result<Transaction> result = (Result<Transaction>)
-          merchant.postTransaction(transaction);
+        Result<Transaction> result = (Result<Transaction>)merchant.postTransaction(transaction);
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         responseDTO.paymentTransactionType(paymentTransactionType);
-        responseDTO.rawResponse(result.getTarget().toNVPString());
+        responseDTO.rawResponse(result.getTarget().getCurrentResponse().dump());
         responseDTO.amount(new Money(result.getTarget().getResponseField(ResponseField.AMOUNT)));
         responseDTO.orderId(result.getTarget().getMerchantDefinedField(MessageConstants.BLC_OID));
         responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
