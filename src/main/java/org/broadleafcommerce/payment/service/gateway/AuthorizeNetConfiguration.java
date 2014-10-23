@@ -104,6 +104,14 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
      * @return String
      */
     public String getServerUrl();
+    
+    /**
+     * Slightly different than {@link #getServerUrl()} in that this is used to communicate with the XML APIs. This does not
+     * have the /gateway/transact.dll on the end of it and serves as a convenience method for whatever is in {@link #getServerUrl()}
+     * 
+     * @return
+     */
+    public String getXMLBaseUrl();
 
     /**
     * This value should only be true when testing in a live environment, e.g. staging.

@@ -73,6 +73,13 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
     public String getServerUrl() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.serverUrl");
     }
+    
+    @Override
+    public String getXMLBaseUrl() {
+        return getServerUrl().replace("/gateway/transact.dll", "")
+                .replace("test", "apitest")
+                .replace("secure", "api");
+    }
 
     @Override
     public String getXTestRequest() {
