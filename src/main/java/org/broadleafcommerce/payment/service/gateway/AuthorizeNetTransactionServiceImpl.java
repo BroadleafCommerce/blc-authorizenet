@@ -17,6 +17,7 @@
  * limitations under the License.
  * #L%
  */
+
 package org.broadleafcommerce.payment.service.gateway;
 
 import net.authorize.AuthNetField;
@@ -26,6 +27,9 @@ import net.authorize.ResponseField;
 import net.authorize.TransactionType;
 import net.authorize.aim.Result;
 import net.authorize.aim.Transaction;
+import net.authorize.data.Order;
+import net.authorize.data.ShippingCharges;
+import net.authorize.data.cim.PaymentTransaction;
 import net.authorize.data.creditcard.CreditCard;
 
 import org.broadleafcommerce.common.money.Money;
@@ -45,7 +49,6 @@ import java.math.BigDecimal;
 import java.util.Map.Entry;
 
 import javax.annotation.Resource;
-
 
 @Service("blAuthorizeNetTransactionService")
 public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransactionService {
@@ -96,70 +99,99 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
                 "Must pass 'x_trans_id' value on the additionalFields of the Payment Request DTO");
         return common(paymentRequestDTO, TransactionType.VOID, PaymentTransactionType.VOID);
     }
-    
+
     private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
         Environment e = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
         Merchant merchant = Merchant.createMerchant(e, configuration.getLoginId(), configuration.getTransactionKey());
-        
-        Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
-        transaction.setMerchantDefinedField(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
-        for(Entry<String, Object> field : paymentRequestDTO.getAdditionalFields().entrySet()) {
-            if (field.getValue() != null) {
-                // do not send any fields that are null or the Auth net API flips out
-                transaction.setMerchantDefinedField(field.getKey(), (String)field.getValue());
-            }
-        }
-        transaction.setTransactionId((String)paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
-        
-        if(transactionType.equals(TransactionType.AUTH_CAPTURE) || transactionType.equals(TransactionType.AUTH_ONLY)) {
-            CreditCard creditCard = CreditCard.createCreditCard();
-            creditCard.setCreditCardNumber(paymentRequestDTO.getCreditCard().getCreditCardNum());
-            creditCard.setExpirationMonth(paymentRequestDTO.getCreditCard().getCreditCardExpMonth());
-            creditCard.setExpirationYear(paymentRequestDTO.getCreditCard().getCreditCardExpYear());
-            transaction.setCreditCard(creditCard);
-        }
-        if(transactionType.equals(TransactionType.CREDIT)) {
-            String cardNumOrLastFour = null;
-            if(paymentRequestDTO.creditCardPopulated()) {
-                cardNumOrLastFour = paymentRequestDTO.getCreditCard().getCreditCardLastFour();
-            }
-            if(cardNumOrLastFour == null && ((String)paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_CARD_NUM.getFieldName())).length() == 4) {
-                cardNumOrLastFour = (String)paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_CARD_NUM.getFieldName());
-            }
-            if(cardNumOrLastFour == null && paymentRequestDTO.creditCardPopulated()) {
-                cardNumOrLastFour = paymentRequestDTO.getCreditCard().getCreditCardNum();
-            }
-
-            CreditCard creditCard = CreditCard.createCreditCard();
-            creditCard.setCreditCardNumber(cardNumOrLastFour);
-            transaction.setCreditCard(creditCard);
-        }
-
-        Result<Transaction> result = (Result<Transaction>)merchant.postTransaction(transaction);
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
-        responseDTO.paymentTransactionType(paymentTransactionType);
-        responseDTO.rawResponse(result.getTarget().toNVPString());
-        responseDTO.amount(new Money(result.getTarget().getResponseField(ResponseField.AMOUNT)));
-        responseDTO.orderId(result.getTarget().getMerchantDefinedField(MessageConstants.BLC_OID));
-        responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
-        responseDTO.responseMap(ResponseField.RESPONSE_CODE.getFieldName(), ""+result.getResponseCode().getCode());
-        responseDTO.responseMap(ResponseField.RESPONSE_REASON_CODE.getFieldName(), ""+result.getReasonResponseCode().getResponseReasonCode());
-        responseDTO.responseMap(ResponseField.RESPONSE_REASON_TEXT.getFieldName(), result.getResponseText());
-        responseDTO.responseMap(ResponseField.TRANSACTION_TYPE.getFieldName(), result.getTarget().getTransactionType().getValue());
-        responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), result.getTarget().getResponseField(ResponseField.AMOUNT));
-        responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), result.getTarget().getAuthorizationCode());
+        // Use the CIM API to send this transaction using the saved information
+        if (paymentRequestDTO.getAdditionalFields().containsKey(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID)
+                && paymentRequestDTO.getAdditionalFields().containsKey(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID)) {
+            
+            net.authorize.cim.Transaction transaction = merchant.createCIMTransaction(net.authorize.cim.TransactionType.CREATE_CUSTOMER_PROFILE_TRANSACTION);
+            transaction.setCustomerProfileId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID));
+            
+            PaymentTransaction paymentTransaction = PaymentTransaction.createPaymentTransaction();
+            transaction.setPaymentTransaction(paymentTransaction);
+            paymentTransaction.setTransactionType(TransactionType.AUTH_CAPTURE);
+            paymentTransaction.setCustomerPaymentProfileId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID));
+            
+            Order order = Order.createOrder();
+            paymentTransaction.setOrder(order);
+            order.setTotalAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
 
-        responseDTO.successful(result.isApproved());
-        if(result.isError()) {
-            responseDTO.valid(false);
-            responseDTO.completeCheckoutOnCallback(false);
+            ShippingCharges shipping = ShippingCharges.createShippingCharges();
+            order.setShippingCharges(shipping);
+            shipping.setFreightAmount(paymentRequestDTO.getShippingTotal());
+            shipping.setTaxAmount(paymentRequestDTO.getTaxTotal());
+            
+            // Submit the transaction
+            net.authorize.cim.Result<net.authorize.cim.Transaction> gatewayResult = 
+                    (net.authorize.cim.Result<net.authorize.cim.Transaction>)merchant.postTransaction(transaction);
+            
+            responseDTO.successful(gatewayResult.isOk());
+            responseDTO.rawResponse(gatewayResult.getTarget().getCurrentResponse().dump());
+        } else {
+            Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
+            transaction.setMerchantDefinedField(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
+            for (Entry<String, Object> field : paymentRequestDTO.getAdditionalFields().entrySet()) {
+                if (field.getValue() != null) {
+                    // do not send any fields that are null or the Auth net API flips out
+                    transaction.setMerchantDefinedField(field.getKey(), (String) field.getValue());
+                }
+            }
+            transaction.setTransactionId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
+
+            if (transactionType.equals(TransactionType.AUTH_CAPTURE) || transactionType.equals(TransactionType.AUTH_ONLY)) {
+                CreditCard creditCard = CreditCard.createCreditCard();
+                creditCard.setCreditCardNumber(paymentRequestDTO.getCreditCard().getCreditCardNum());
+                creditCard.setExpirationMonth(paymentRequestDTO.getCreditCard().getCreditCardExpMonth());
+                creditCard.setExpirationYear(paymentRequestDTO.getCreditCard().getCreditCardExpYear());
+                transaction.setCreditCard(creditCard);
+            }
+            if (transactionType.equals(TransactionType.CREDIT)) {
+                String cardNumOrLastFour = null;
+                if (paymentRequestDTO.creditCardPopulated()) {
+                    cardNumOrLastFour = paymentRequestDTO.getCreditCard().getCreditCardLastFour();
+                }
+                if (cardNumOrLastFour == null && ((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_CARD_NUM.getFieldName())).length() == 4) {
+                    cardNumOrLastFour = (String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_CARD_NUM.getFieldName());
+                }
+                if (cardNumOrLastFour == null && paymentRequestDTO.creditCardPopulated()) {
+                    cardNumOrLastFour = paymentRequestDTO.getCreditCard().getCreditCardNum();
+                }
+
+                CreditCard creditCard = CreditCard.createCreditCard();
+                creditCard.setCreditCardNumber(cardNumOrLastFour);
+                transaction.setCreditCard(creditCard);
+            }
+
+            Result<Transaction> result = (Result<Transaction>) merchant.postTransaction(transaction);
+
+            responseDTO.paymentTransactionType(paymentTransactionType);
+            responseDTO.rawResponse(result.getTarget().toNVPString());
+            responseDTO.amount(new Money(result.getTarget().getResponseField(ResponseField.AMOUNT)));
+            responseDTO.orderId(result.getTarget().getMerchantDefinedField(MessageConstants.BLC_OID));
+            responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
+            responseDTO.responseMap(ResponseField.RESPONSE_CODE.getFieldName(), "" + result.getResponseCode().getCode());
+            responseDTO.responseMap(ResponseField.RESPONSE_REASON_CODE.getFieldName(), "" + result.getReasonResponseCode().getResponseReasonCode());
+            responseDTO.responseMap(ResponseField.RESPONSE_REASON_TEXT.getFieldName(), result.getResponseText());
+            responseDTO.responseMap(ResponseField.TRANSACTION_TYPE.getFieldName(), result.getTarget().getTransactionType().getValue());
+            responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), result.getTarget().getResponseField(ResponseField.AMOUNT));
+            responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), result.getTarget().getAuthorizationCode());
+
+            responseDTO.successful(result.isApproved());
+            if (result.isError()) {
+                responseDTO.valid(false);
+                responseDTO.completeCheckoutOnCallback(false);
+            }
+
+            for (String fieldKey : result.getTarget().getMerchantDefinedMap().keySet()) {
+                responseDTO.responseMap(fieldKey, result.getTarget().getMerchantDefinedField(fieldKey));
+            }
         }
-        
-        for(String fieldKey : result.getTarget().getMerchantDefinedMap().keySet()) {
-            responseDTO.responseMap(fieldKey, result.getTarget().getMerchantDefinedField(fieldKey));
-        }
-        
+
         return responseDTO;
 
     }
