@@ -42,6 +42,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
+import java.util.Map.Entry;
 
 import javax.annotation.Resource;
 
@@ -97,13 +98,16 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
     }
     
     private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
-        Environment e = Environment.createEnvironment(configuration.getServerUrl(), configuration.getServerUrl().replace("test", "apitest").replace("secure", "api"));
+        Environment e = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
         Merchant merchant = Merchant.createMerchant(e, configuration.getLoginId(), configuration.getTransactionKey());
         
         Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
         transaction.setMerchantDefinedField(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
-        for(String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
-            transaction.setMerchantDefinedField(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
+        for(Entry<String, Object> field : paymentRequestDTO.getAdditionalFields().entrySet()) {
+            if (field.getValue() != null) {
+                // do not send any fields that are null or the Auth net API flips out
+                transaction.setMerchantDefinedField(field.getKey(), (String)field.getValue());
+            }
         }
         transaction.setTransactionId((String)paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
         
@@ -135,7 +139,7 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         responseDTO.paymentTransactionType(paymentTransactionType);
-        responseDTO.rawResponse(result.getTarget().getCurrentResponse().dump());
+        responseDTO.rawResponse(result.getTarget().toNVPString());
         responseDTO.amount(new Money(result.getTarget().getResponseField(ResponseField.AMOUNT)));
         responseDTO.orderId(result.getTarget().getMerchantDefinedField(MessageConstants.BLC_OID));
         responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
