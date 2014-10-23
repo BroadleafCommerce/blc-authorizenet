@@ -20,17 +20,47 @@
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
 
+import net.authorize.sim.Result;
+
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
-import net.authorize.sim.Result;
 
 /**
  * @author elbertbautista
  */
 public interface AuthorizeNetCheckoutService {
 
+    /**
+     * Builds the Javascript snippet necessary 
+     * 
+     * @param receiptUrl
+     * @param result
+     * @return
+     */
     public String buildRelayResponse(String receiptUrl, Result result);
 
-    public String createTamperProofSeal(String string, String string2) throws NoSuchAlgorithmException, InvalidKeyException;
+    /**
+     * Creates a seal for the current customer and order combined with the Authorize.net private key to verify that
+     * requests and responses actually came from Broadleaf.
+     * 
+     * @param customerId
+     * @param orderId
+     * @return
+     * @throws NoSuchAlgorithmException
+     * @throws InvalidKeyException
+     * @see {@link #createTamperProofSeal(String, String)}
+     */
+    public String createTamperProofSeal(String customerId, String orderId) throws NoSuchAlgorithmException, InvalidKeyException;
+    
+    /**
+     * Verifies that the given tamper proof seal is valid for the given customer and order
+     * 
+     * @param customerId
+     * @param orderId
+     * @param tps
+     * @return
+     * @see {@link #createTamperProofSeal(String, String)}
+     */
+    public boolean verifyTamperProofSeal(String customerId, String orderId, String tps);
+    
 }
