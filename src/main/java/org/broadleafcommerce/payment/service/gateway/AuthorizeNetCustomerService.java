@@ -82,7 +82,14 @@ public class AuthorizeNetCustomerService implements PaymentGatewayCustomerServic
         PaymentResponseDTO paymentResponse = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         paymentResponse.rawResponse(result.getTarget().getCurrentResponse().dump());
         paymentResponse.successful(result.isOk());
-        paymentResponse.responseMap(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID.getFieldName(), result.getCustomerProfileId());
+        if (result.isOk()) {
+            paymentResponse.responseMap(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID.getFieldName(), result.getCustomerProfileId());
+            paymentResponse.responseMap(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID.getFieldName(), result.getCustomerPaymentProfileIdList().get(0));
+        } else {
+            // TODO: fix error codes
+            paymentResponse.responseMap(Result.ERROR, result.getResultCode());
+        }
+        
         return paymentResponse;
     }
 
