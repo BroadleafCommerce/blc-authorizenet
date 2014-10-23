@@ -19,11 +19,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import java.util.Map;
-
-import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
-
 import net.authorize.AuthNetField;
 
 import org.broadleafcommerce.common.money.Money;
@@ -33,9 +28,15 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponsePrintService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetCheckoutService;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
+
+import java.util.Map;
+
+import javax.annotation.Resource;
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * @author Chad Harchar (charchar)
@@ -48,6 +49,9 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
     
     @Resource(name = "blPaymentGatewayWebResponsePrintService")
     protected PaymentGatewayWebResponsePrintService webResponsePrintService;
+    
+    @Resource(name = "blAuthorizeNetCheckoutService")
+    protected AuthorizeNetCheckoutService authorizeNetCheckoutService;
 
     @Override
     public PaymentResponseDTO translateWebResponse(HttpServletRequest request) throws PaymentException {
@@ -77,6 +81,12 @@ public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResp
         if (!configuration.isPerformAuthorizeAndCapture()) {
             type = PaymentTransactionType.AUTHORIZE;
         }
+
+        // Validate this is a real request from Authorize.net
+        String customerId = responseDTO.getResponseMap().get(MessageConstants.BLC_CID);
+        String orderId = responseDTO.getResponseMap().get(MessageConstants.BLC_OID);
+        String tps = responseDTO.getResponseMap().get(MessageConstants.BLC_TPS);
+        responseDTO.valid(authorizeNetCheckoutService.verifyTamperProofSeal(customerId, orderId, tps));
 
         responseDTO.successful(approved)
         .amount(amount)
