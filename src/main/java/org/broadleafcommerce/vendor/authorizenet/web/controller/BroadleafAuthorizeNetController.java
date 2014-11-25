@@ -158,6 +158,7 @@ public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractContr
         
         // This is a hacky way to do this but has to be done because the handleProcessingException does not give enough
         // information to actually be useful in doing what I need. Ideally this logic would go in handleProcessingException
+        // TODO: It is possible that this has already been voided if this was an exception in the checkout workflow itself
         if (error || getErrorViewRedirect().equals(returnUrl)) {
             PaymentResponseDTO responseDTO = getWebResponseService().translateWebResponse(request);
             PaymentRequestDTO voidRequest = responseToVoidRequest(responseDTO);

@@ -40,6 +40,7 @@ import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayCustomerService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
+import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import org.w3c.dom.Element;
@@ -83,8 +84,8 @@ public class AuthorizeNetCustomerService implements PaymentGatewayCustomerServic
         paymentResponse.rawResponse(result.getTarget().getCurrentResponse().dump());
         paymentResponse.successful(result.isOk());
         if (result.isOk()) {
-            paymentResponse.responseMap(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID.getFieldName(), result.getCustomerProfileId());
-            paymentResponse.responseMap(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID.getFieldName(), result.getCustomerPaymentProfileIdList().get(0));
+            paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, result.getCustomerProfileId());
+            paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, result.getCustomerPaymentProfileIdList().get(0));
         } else {
             // TODO: fix error codes
             paymentResponse.responseMap(Result.ERROR, result.getResultCode());

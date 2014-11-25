@@ -19,11 +19,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-import javax.annotation.Resource;
-
 import net.authorize.AuthNetField;
 import net.authorize.sim.Fingerprint;
 
@@ -37,6 +32,11 @@ import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGat
 import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.annotation.Resource;
 
 /**
  * @author Chad Harchar (charchar)
@@ -71,7 +71,8 @@ public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewa
 
         String apiLoginId = configuration.getLoginId();
         String transactionKey = configuration.getTransactionKey();
-        String relayResponseURL = configuration.getResponseUrl();
+        String overrideRelayUrl = (String) requestDTO.getAdditionalFields().get("x_relay_url");
+        String relayResponseURL = (overrideRelayUrl != null) ? overrideRelayUrl : configuration.getResponseUrl();
         String merchantTransactionVersion = configuration.getTransactionVersion();
         String xTestRequest = configuration.getXTestRequest();
         String serverUrl = configuration.getServerUrl();

@@ -46,6 +46,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
 import java.math.BigDecimal;
+import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Resource;
@@ -106,21 +107,22 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         // Use the CIM API to send this transaction using the saved information
-        if (paymentRequestDTO.getAdditionalFields().containsKey(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID)
-                && paymentRequestDTO.getAdditionalFields().containsKey(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID)) {
+        if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.CUSTOMER_PROFILE_ID)
+                && paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYMENT_PROFILE_ID)) {
             
             net.authorize.cim.Transaction transaction = merchant.createCIMTransaction(net.authorize.cim.TransactionType.CREATE_CUSTOMER_PROFILE_TRANSACTION);
-            transaction.setCustomerProfileId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.ELEMENT_CUSTOMER_PROFILE_ID));
+            transaction.setCustomerProfileId((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CUSTOMER_PROFILE_ID));
             
             PaymentTransaction paymentTransaction = PaymentTransaction.createPaymentTransaction();
             transaction.setPaymentTransaction(paymentTransaction);
-            paymentTransaction.setTransactionType(TransactionType.AUTH_CAPTURE);
-            paymentTransaction.setCustomerPaymentProfileId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.ELEMENT_CUSTOMER_PAYMENT_PROFILE_ID));
+            paymentTransaction.setTransactionType(transactionType);
+            paymentTransaction.setCustomerPaymentProfileId((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYMENT_PROFILE_ID));
             
             Order order = Order.createOrder();
             paymentTransaction.setOrder(order);
             order.setTotalAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
-
+            order.setInvoiceNumber(System.currentTimeMillis() + "");
+            
             ShippingCharges shipping = ShippingCharges.createShippingCharges();
             order.setShippingCharges(shipping);
             shipping.setFreightAmount(paymentRequestDTO.getShippingTotal());
@@ -132,6 +134,14 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
             
             responseDTO.successful(gatewayResult.isOk());
             responseDTO.rawResponse(gatewayResult.getTarget().getCurrentResponse().dump());
+            responseDTO.orderId(paymentRequestDTO.getOrderId());
+            Map<ResponseField, String> responseMap = gatewayResult.getDirectResponseList().get(0).getDirectResponseMap();
+            responseDTO.creditCard()
+                .creditCardLastFour(responseMap.get(ResponseField.ACCOUNT_NUMBER))
+                .creditCardType(responseMap.get(ResponseField.CARD_TYPE));
+            responseDTO.amount(new Money(responseMap.get(ResponseField.AMOUNT)));
+            responseDTO.customer().email(responseMap.get(ResponseField.EMAIL_ADDRESS));
+            responseDTO.paymentTransactionType(paymentTransactionType);
         } else {
             Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
             transaction.setMerchantDefinedField(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
