@@ -28,7 +28,9 @@ import net.authorize.cim.Transaction;
 import net.authorize.cim.TransactionType;
 import net.authorize.util.BasicXmlDocument;
 import net.authorize.util.HttpClient;
+import net.authorize.xml.Message;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -47,6 +49,7 @@ import org.w3c.dom.Element;
 
 import java.io.InputStream;
 import java.net.URI;
+import java.util.List;
 
 import javax.annotation.Resource;
 
@@ -87,8 +90,12 @@ public class AuthorizeNetCustomerService implements PaymentGatewayCustomerServic
             paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, result.getCustomerProfileId());
             paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, result.getCustomerPaymentProfileIdList().get(0));
         } else {
-            // TODO: fix error codes
-            paymentResponse.responseMap(Result.ERROR, result.getResultCode());
+            List<Message> messages = result.getMessages();
+            if (CollectionUtils.isNotEmpty(messages)) {
+                paymentResponse.responseMap(Result.ERROR, messages.get(0).getCode());
+            } else {
+                paymentResponse.responseMap(Result.ERROR, result.getResultCode());
+            }
         }
         
         return paymentResponse;
