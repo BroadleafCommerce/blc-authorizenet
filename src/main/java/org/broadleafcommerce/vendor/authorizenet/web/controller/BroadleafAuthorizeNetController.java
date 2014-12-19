@@ -109,7 +109,10 @@ public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractContr
     @RequestMapping(value = "/error", method = RequestMethod.GET)
     public String errorEndpoint(Model model, HttpServletRequest request, RedirectAttributes redirectAttributes,
             Map<String, String> pathVars) throws PaymentException {
-        redirectAttributes.addAttribute(PAYMENT_PROCESSING_ERROR, request.getParameter(PAYMENT_PROCESSING_ERROR));
+        redirectAttributes.addAttribute(PAYMENT_PROCESSING_ERROR, getProcessingErrorMessage());
+        for (String key : (Set<String>) request.getParameterMap().keySet()) {
+            redirectAttributes.addAttribute(key, request.getParameter(key));
+        }
         return getOrderReviewRedirect();
     }
 
