@@ -67,7 +67,7 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.responseUrl=? (e.g. http://staging.mycompany.com/authorizenet/process)
     gateway.authorizenet.confirmUrl=? (e.g. http://staging.mycompany.com/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://staging.mycompany.com/authorizenet/error)
-    gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
+    gateway.authorizenet.serverUrl=https://secure2.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=TRUE
 
 - gateway.authorizenet.responseUrl: must be a publicly accessible URL. 
@@ -82,7 +82,7 @@ By including the x_test_request field with a value of “TRUE” in the HTML For
     gateway.authorizenet.responseUrl=? (e.g. http://mycompany.com/authorizenet/process)
     gateway.authorizenet.confirmUrl=? (e.g. http://mycompany.com/authorizenet/return)
     gateway.authorizenet.errorUrl=? (e.g. http://mycompany.com/authorizenet/error)
-    gateway.authorizenet.serverUrl=https://secure.authorize.net/gateway/transact.dll
+    gateway.authorizenet.serverUrl=https://secure2.authorize.net/gateway/transact.dll
     gateway.authorizenet.xTestRequest=FALSE
 
 - gateway.authorizenet.responseUrl: must be a publicly accessible URL. 
