@@ -141,7 +141,7 @@ public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractContr
      * @param model
      * @return
      */
-    @RequestMapping(value = "/process", method = RequestMethod.POST, produces = "text/html")
+    @RequestMapping(value = "/process", method = RequestMethod.POST)
     public @ResponseBody String process(HttpServletRequest request,
             HttpServletResponse response,
             RedirectAttributes redirectAttributes,
