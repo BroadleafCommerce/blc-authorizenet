@@ -20,6 +20,26 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.money.Money;
+import org.broadleafcommerce.common.payment.PaymentTransactionType;
+import org.broadleafcommerce.common.payment.PaymentType;
+import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
+import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
+import org.broadleafcommerce.common.time.SystemTime;
+import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
+import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
+import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
+import org.broadleafcommerce.vendor.authorizenet.util.AuthorizeNetUtil;
+import org.springframework.stereotype.Service;
+import org.springframework.util.Assert;
+
+import java.math.BigDecimal;
+import java.util.Map;
+import java.util.Map.Entry;
+
+import javax.annotation.Resource;
+
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
 import net.authorize.Merchant;
@@ -32,30 +52,14 @@ import net.authorize.data.ShippingCharges;
 import net.authorize.data.cim.PaymentTransaction;
 import net.authorize.data.creditcard.CreditCard;
 
-import org.broadleafcommerce.common.money.Money;
-import org.broadleafcommerce.common.payment.PaymentTransactionType;
-import org.broadleafcommerce.common.payment.PaymentType;
-import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
-import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
-import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
-import org.broadleafcommerce.common.time.SystemTime;
-import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
-import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
-import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
-import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
-
-import java.math.BigDecimal;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import javax.annotation.Resource;
-
 @Service("blAuthorizeNetTransactionService")
 public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransactionService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;
+    
+    @Resource
+    protected AuthorizeNetUtil util;
 
     @Override
     public PaymentResponseDTO authorize(PaymentRequestDTO paymentRequestDTO) throws PaymentException {
@@ -106,6 +110,9 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
         Merchant merchant = Merchant.createMerchant(e, configuration.getLoginId(), configuration.getTransactionKey());
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
+        
+        parseOutConsolidatedTokenField(paymentRequestDTO);
+        
         // Use the CIM API to send this transaction using the saved information
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.CUSTOMER_PROFILE_ID)
                 && paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYMENT_PROFILE_ID)) {
@@ -206,6 +213,25 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
 
         return responseDTO;
 
+    }
+
+    /**
+     * Takes a "TOKEN" field from the given <b>paymentRequestDTO</b> and parses that into distinct parts of
+     * {@link MessageConstants#CUSTOMER_PROFILE_ID} and {@link MessageConstants#PAYMENT_PROFILE_ID} and puts each of those
+     * into the given {@link PaymentRequestDTO#getAdditionalFields()}
+     * 
+     * @param paymentRequestDTO
+     * 
+     */
+    protected void parseOutConsolidatedTokenField(PaymentRequestDTO paymentRequestDTO) {
+        // NOTE: in Broadleaf 4.0.5+ the "TOKEN" field is an enum in PaymentAdditionalFieldType.TOKEN. This string is hardcoded
+        // manually to keep backwards compatibility
+        String consolidatedToken = (String) paymentRequestDTO.getAdditionalFields().get("TOKEN");
+        if (consolidatedToken != null) {
+            String[] profileIdPaymentId = util.parseConsolidatedPaymentToken(consolidatedToken);
+            paymentRequestDTO.getAdditionalFields().put(MessageConstants.CUSTOMER_PROFILE_ID, profileIdPaymentId[0]);
+            paymentRequestDTO.getAdditionalFields().put(MessageConstants.PAYMENT_PROFILE_ID, profileIdPaymentId[1]);
+        }
     }
 
 }
