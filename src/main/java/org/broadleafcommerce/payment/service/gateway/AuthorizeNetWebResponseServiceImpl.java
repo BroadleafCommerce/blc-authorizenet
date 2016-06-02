@@ -25,6 +25,7 @@ import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponsePrintService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayWebResponseService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
@@ -42,7 +43,7 @@ import javax.servlet.http.HttpServletRequest;
  * @author Chad Harchar (charchar)
  */
 @Service("blAuthorizeNetWebResponseService")
-public class AuthorizeNetWebResponseServiceImpl implements PaymentGatewayWebResponseService {
+public class AuthorizeNetWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;

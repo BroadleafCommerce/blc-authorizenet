@@ -22,6 +22,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransactionConfirmationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionConfirmationService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
@@ -31,7 +32,7 @@ import org.springframework.stereotype.Service;
 import javax.annotation.Resource;
 
 @Service("blAuthorizeNetTransactionConfirmationService")
-public class AuthorizeNetTransactionConfirmationService implements PaymentGatewayTransactionConfirmationService {
+public class AuthorizeNetTransactionConfirmationService extends AbstractPaymentGatewayTransactionConfirmationService implements PaymentGatewayTransactionConfirmationService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected PaymentGatewayConfiguration configuration;

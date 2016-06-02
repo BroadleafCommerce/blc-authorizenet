@@ -17,7 +17,7 @@
  * limitations under the License.
  * #L%
  */
-package org.broadleafcommerce.vendor.authroizenet.creditcard;
+package org.broadleafcommerce.vendor.authorizenet.service.payment.type;
 
 import net.authorize.data.creditcard.CardType;
 

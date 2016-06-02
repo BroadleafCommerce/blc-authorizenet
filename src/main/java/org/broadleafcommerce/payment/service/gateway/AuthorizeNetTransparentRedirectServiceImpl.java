@@ -25,6 +25,7 @@ import net.authorize.sim.Fingerprint;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransparentRedirectService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransparentRedirectService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetCheckoutService;
@@ -42,7 +43,7 @@ import javax.annotation.Resource;
  * @author Chad Harchar (charchar)
  */
 @Service("blAuthorizeNetTransparentRedirectService")
-public class AuthorizeNetTransparentRedirectServiceImpl implements PaymentGatewayTransparentRedirectService {
+public class AuthorizeNetTransparentRedirectServiceImpl extends AbstractPaymentGatewayTransparentRedirectService implements PaymentGatewayTransparentRedirectService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;

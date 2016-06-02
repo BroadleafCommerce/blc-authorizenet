@@ -20,6 +20,7 @@
 package org.broadleafcommerce.payment.service.gateway;
 
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
 import org.springframework.stereotype.Service;
@@ -28,7 +29,7 @@ import org.springframework.stereotype.Service;
  * @author Chad Harchar (charchar)
  */
 @Service("blAuthorizeNetConfiguration")
-public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration {
+public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfiguration implements AuthorizeNetConfiguration {
 
     protected int failureReportingThreshold = 1;
 

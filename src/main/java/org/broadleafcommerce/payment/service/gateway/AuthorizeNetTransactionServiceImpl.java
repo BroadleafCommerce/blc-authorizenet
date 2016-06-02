@@ -25,6 +25,7 @@ import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransactionService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransactionService;
 import org.broadleafcommerce.common.time.SystemTime;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
@@ -53,7 +54,7 @@ import net.authorize.data.cim.PaymentTransaction;
 import net.authorize.data.creditcard.CreditCard;
 
 @Service("blAuthorizeNetTransactionService")
-public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransactionService {
+public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTransactionService implements PaymentGatewayTransactionService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;

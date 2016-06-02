@@ -39,6 +39,7 @@ import org.apache.http.impl.client.DefaultHttpClient;
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
+import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayCustomerService;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayCustomerService;
 import org.broadleafcommerce.common.vendor.service.exception.PaymentException;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
@@ -59,7 +60,7 @@ import javax.annotation.Resource;
  * @author Phillip Verheyden (phillipuniverse)
  */
 @Service("blAuthorizeNetCustomerService")
-public class AuthorizeNetCustomerService implements PaymentGatewayCustomerService {
+public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerService implements PaymentGatewayCustomerService {
 
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;
