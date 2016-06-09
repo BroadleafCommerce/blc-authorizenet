@@ -22,14 +22,21 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
 import org.broadleafcommerce.common.util.BLCSystemProperty;
+import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
 import org.springframework.stereotype.Service;
+import java.net.URI;
+import java.net.URISyntaxException;
+import javax.annotation.Resource;
 
 /**
  * @author Chad Harchar (charchar)
  */
 @Service("blAuthorizeNetConfiguration")
 public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfiguration implements AuthorizeNetConfiguration {
+
+    @Resource(name = "blBaseUrlResolver")
+    protected BaseUrlResolver urlResolver;
 
     protected int failureReportingThreshold = 1;
 
@@ -57,17 +64,50 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getResponseUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.responseUrl");
+        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.responseUrl");
+        try {
+            URI u = new URI(url);
+            if (u.isAbsolute()) {
+                return url;
+            } else {
+                String baseUrl = urlResolver.getSiteBaseUrl();
+                return baseUrl + url;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("The value for 'gateway.authorizenet.responseUrl' is not valid.", e);
+        }
     }
 
     @Override
     public String getConfirmUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.confirmUrl");
+        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.confirmUrl");
+        try {
+            URI u = new URI(url);
+            if (u.isAbsolute()) {
+                return url;
+            } else {
+                String baseUrl = urlResolver.getSiteBaseUrl();
+                return baseUrl + url;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("The value for 'gateway.authorizenet.confirmUrl' is not valid.", e);
+        }
     }
 
     @Override
     public String getErrorUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.errorUrl");
+        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.errorUrl");
+        try {
+            URI u = new URI(url);
+            if (u.isAbsolute()) {
+                return url;
+            } else {
+                String baseUrl = urlResolver.getSiteBaseUrl();
+                return baseUrl + url;
+            }
+        } catch (URISyntaxException e) {
+            throw new IllegalArgumentException("The value for 'gateway.authorizenet.errorUrl' is not valid.", e);
+        }
     }
 
     @Override
