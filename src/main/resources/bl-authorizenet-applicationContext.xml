@@ -32,7 +32,9 @@
            http://schema.broadleafcommerce.org/mo/mo-3.0.xsd">
 
     <context:component-scan base-package="org.broadleafcommerce.payment.service.gateway"/>
-    <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet"/>
+    <context:component-scan base-package="org.broadleafcommerce.vendor.authorizenet">
+        <context:exclude-filter type="regex" expression="org.broadleafcommerce.vendor.authorizenet.web.controller.*"/>
+    </context:component-scan>
 
     <bean class="org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType"/>
 
