@@ -152,6 +152,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             responseDTO.paymentTransactionType(paymentTransactionType);
         } else {
             Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
+            transaction.getRequestMap().put(AuthNetField.X_TEST_REQUEST.getFieldName(), configuration.getXTestRequest());
             transaction.setMerchantDefinedField(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
             for (Entry<String, Object> field : paymentRequestDTO.getAdditionalFields().entrySet()) {
                 if (field.getValue() != null) {
