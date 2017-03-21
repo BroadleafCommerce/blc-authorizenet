@@ -20,16 +20,6 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
-import net.authorize.AuthNetField;
-import net.authorize.Environment;
-import net.authorize.Merchant;
-import net.authorize.cim.Result;
-import net.authorize.cim.Transaction;
-import net.authorize.cim.TransactionType;
-import net.authorize.util.BasicXmlDocument;
-import net.authorize.util.HttpClient;
-import net.authorize.xml.Message;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -52,6 +42,16 @@ import java.net.URI;
 import java.util.List;
 
 import javax.annotation.Resource;
+
+import net.authorize.AuthNetField;
+import net.authorize.Environment;
+import net.authorize.Merchant;
+import net.authorize.cim.Result;
+import net.authorize.cim.Transaction;
+import net.authorize.cim.TransactionType;
+import net.authorize.util.BasicXmlDocument;
+import net.authorize.util.HttpClient;
+import net.authorize.xml.Message;
 
 /**
  * CIM Guide, as of this writing, is located at http://www.authorize.net/support/CIM_XML_guide.pdf
@@ -179,8 +179,7 @@ public class AuthorizeNetCustomerService implements PaymentGatewayCustomerServic
 
             if (rawResponseString == null) return null;
 
-            if (Environment.SANDBOX.equals(env) ||
-                    Environment.SANDBOX_TESTMODE.equals(env)) {
+            if (Environment.SANDBOX.equals(env)) {
 
             }
 
