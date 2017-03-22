@@ -17,9 +17,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import net.authorize.AuthNetField;
-import net.authorize.sim.Fingerprint;
-
 import org.broadleafcommerce.common.payment.PaymentType;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
@@ -37,9 +34,13 @@ import java.security.NoSuchAlgorithmException;
 
 import javax.annotation.Resource;
 
+import net.authorize.AuthNetField;
+import net.authorize.sim.Fingerprint;
+
 /**
  * @author Chad Harchar (charchar)
  */
+@Deprecated
 @Service("blAuthorizeNetTransparentRedirectService")
 public class AuthorizeNetTransparentRedirectServiceImpl extends AbstractPaymentGatewayTransparentRedirectService implements PaymentGatewayTransparentRedirectService {
 

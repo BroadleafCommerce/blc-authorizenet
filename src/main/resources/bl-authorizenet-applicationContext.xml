@@ -48,4 +48,16 @@
         <property name="targetRef" value="blPaymentGatewayConfigurationServices"/>
     </bean>
 
+    <bean id="blAuthorizeNetVariableExpressions" class="org.springframework.beans.factory.config.ListFactoryBean">
+        <property name="sourceList">
+            <list>
+                <ref bean="blAuthorizeNetVariableExpression"/>
+            </list>
+        </property>
+    </bean>
+    <bean class="org.broadleafcommerce.common.extensibility.context.merge.LateStageMergeBeanPostProcessor">
+        <property name="collectionRef" value="blAuthorizeNetVariableExpressions"/>
+        <property name="targetRef" value="blVariableExpressions"/>
+    </bean>
+
 </beans>

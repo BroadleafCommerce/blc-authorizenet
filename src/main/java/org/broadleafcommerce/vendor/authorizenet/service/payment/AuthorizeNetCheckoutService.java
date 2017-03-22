@@ -18,14 +18,15 @@
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
 
-import net.authorize.sim.Result;
-
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import net.authorize.sim.Result;
 
 /**
  * @author elbertbautista
+ * @deprecated - Transparent Redirect is no longer used in favor of Accept.js integration
  */
+@Deprecated
 public interface AuthorizeNetCheckoutService {
 
     /**

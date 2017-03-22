@@ -353,7 +353,7 @@
         <dependency>
             <groupId>net.authorize</groupId>
             <artifactId>anet-java-sdk</artifactId>
-            <version>1.8.2</version>
+            <version>1.9.2</version>
         </dependency>
         <dependency>
             <groupId>org.hsqldb</groupId>

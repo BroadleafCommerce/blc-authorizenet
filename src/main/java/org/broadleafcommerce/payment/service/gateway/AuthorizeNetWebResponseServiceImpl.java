@@ -17,8 +17,6 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
-import net.authorize.AuthNetField;
-
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -37,9 +35,12 @@ import java.util.Map;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 
+import net.authorize.AuthNetField;
+
 /**
  * @author Chad Harchar (charchar)
  */
+@Deprecated
 @Service("blAuthorizeNetWebResponseService")
 public class AuthorizeNetWebResponseServiceImpl extends AbstractPaymentGatewayWebResponseService implements PaymentGatewayWebResponseService {
 

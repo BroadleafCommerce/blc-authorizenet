@@ -18,8 +18,6 @@
 
 package org.broadleafcommerce.vendor.authorizenet.web.controller;
 
-import net.authorize.sim.Result;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
@@ -39,19 +37,20 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
-
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import net.authorize.sim.Result;
 
 /**
  * @author Chad Harchar (charchar)
  * @author Elbert Bautista (elbertbautista)
+ * @deprecated - Transparent Redirect is no longer used in favor of Accept.js integration
  */
+@Deprecated
 @Controller("blAuthorizeNetController")
 @RequestMapping("/" + BroadleafAuthorizeNetController.GATEWAY_CONTEXT_KEY)
 public class BroadleafAuthorizeNetController extends PaymentGatewayAbstractController {

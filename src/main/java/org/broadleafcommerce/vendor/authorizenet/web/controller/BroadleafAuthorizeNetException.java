@@ -17,6 +17,7 @@
  */
 package org.broadleafcommerce.vendor.authorizenet.web.controller;
 
+@Deprecated
 public class BroadleafAuthorizeNetException extends Exception{
 	
 	private static final long serialVersionUID = 1L;
