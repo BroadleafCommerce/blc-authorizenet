@@ -36,6 +36,9 @@ Make sure to include the dependency in your CORE pom.xml as well:
     <artifactId>broadleaf-authorizenet</artifactId>
 </dependency>
 ```
+
+> Note: If using the sample Heat Clinic, you'll want to remove the sample payment gateway dependency from your poms as well
+
 You should now begin to setup your environment to work with Broadleaf Commerce Authorize.net support. 
 The first step is to make Broadleaf Commerce aware of your Authorize.net account credentials. 
 This is accomplished through environment configuration (see [[Runtime Environment Configuration]]).
