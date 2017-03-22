@@ -20,20 +20,20 @@
 
 package org.broadleafcommerce.vendor.authorizenet.web.expression;
 
-import net.authorize.AuthNetField;
-
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.web.payment.expression.AbstractPaymentGatewayFieldExtensionHandler;
 import org.broadleafcommerce.common.web.payment.expression.PaymentGatewayFieldExtensionManager;
 import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
 import org.springframework.stereotype.Service;
-
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
+import net.authorize.AuthNetField;
 
 /**
  * @author Chad Harchar (charchar)
+ * @deprecated - Transparent Redirect is no longer used in favor of Accept.js integration
  */
+@Deprecated
 @Service("blAuthorizeNetFieldExtensionHandler")
 public class AuthorizeNetFieldExtensionHandler extends AbstractPaymentGatewayFieldExtensionHandler {
 

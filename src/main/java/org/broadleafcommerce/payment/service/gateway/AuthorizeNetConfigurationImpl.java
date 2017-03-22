@@ -40,6 +40,11 @@ public class AuthorizeNetConfigurationImpl implements AuthorizeNetConfiguration 
     }
 
     @Override
+    public String getClientKey() {
+        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.clientKey");
+    }
+
+    @Override
     public String getTransactionKey() {
         return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.transactionKey");
     }

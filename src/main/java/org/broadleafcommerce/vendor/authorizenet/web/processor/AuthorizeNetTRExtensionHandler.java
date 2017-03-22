@@ -19,15 +19,6 @@
  */
 package org.broadleafcommerce.vendor.authorizenet.web.processor;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
-
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayConfiguration;
 import org.broadleafcommerce.common.payment.service.PaymentGatewayTransparentRedirectService;
@@ -36,11 +27,20 @@ import org.broadleafcommerce.common.web.payment.processor.TRCreditCardExtensionM
 import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.type.MessageConstants;
 import org.springframework.stereotype.Service;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import javax.annotation.PostConstruct;
+import javax.annotation.Resource;
 
 
 /**
  * @author Chad Harchar (charchar)
+ * @deprecated - Transparent Redirect is no longer used in favor of Accept.js integration
  */
+@Deprecated
 @Service("blAuthorizeNetTRExtensionHandler")
 public class AuthorizeNetTRExtensionHandler extends AbstractTRCreditCardExtensionHandler {
 

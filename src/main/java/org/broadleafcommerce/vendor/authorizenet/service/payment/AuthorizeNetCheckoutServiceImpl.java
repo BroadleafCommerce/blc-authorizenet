@@ -20,27 +20,26 @@
 
 package org.broadleafcommerce.vendor.authorizenet.service.payment;
 
-import net.authorize.ResponseField;
-import net.authorize.sim.Result;
-
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.payment.service.gateway.AuthorizeNetConfiguration;
 import org.springframework.stereotype.Service;
-
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-
 import javax.annotation.Resource;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import net.authorize.ResponseField;
+import net.authorize.sim.Result;
 
 /**
  * @author elbertbautista
+ * @deprecated - Transparent Redirect is no longer used in favor of Accept.js integration
  */
+@Deprecated
 @Service("blAuthorizeNetCheckoutService")
 public class AuthorizeNetCheckoutServiceImpl implements AuthorizeNetCheckoutService {
 

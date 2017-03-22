@@ -35,6 +35,13 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     public String getLoginId();
 
     /**
+     * This is the generated client key, provided by the
+     * Merchant Interface that is used in an Accept.js implementation
+     * @return
+     */
+    public String getClientKey();
+
+    /**
     * This is the transaction fingerprint, provided by the
     * Merchant Interface.
     *
@@ -65,6 +72,7 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     *
     * @return String
     */
+    @Deprecated
     public String getResponseUrl();
 
     /**
@@ -74,6 +82,7 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     *
     * @return String
     */
+    @Deprecated
     public String getConfirmUrl();
 
     /**
@@ -83,6 +92,7 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     *
     * @return String
     */
+    @Deprecated
     public String getErrorUrl();
 
     /**
