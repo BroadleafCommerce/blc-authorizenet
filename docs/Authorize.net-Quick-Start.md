@@ -27,7 +27,7 @@ These instructions assume integration with the default Heat Clinic Demo Site pro
     <input type="text" id="securityCode" autocomplete="off" placeholder="CVV" />
     <input type="hidden" name="OPAQUE_DATA_DESCRIPTOR" id="OPAQUE_DATA_DESCRIPTOR"/>
     <input type="hidden" name="OPAQUE_DATA_VALUE" id="OPAQUE_DATA_VALUE"/>
-    <input type="submit" value="Complete Order" />
+    <input type="submit" id="anet_checkout_form_button" value="Complete Order" />
 </blc:form>
 ```
 
@@ -38,10 +38,6 @@ These instructions assume integration with the default Heat Clinic Demo Site pro
 
 ```html
     <script type="text/javascript" th:inline="javascript">
-        $('#anet_checkout_form_button').on("click", function(e) {
-            e.preventDefault();
-            sendPaymentDataToAnet();
-        });
         
         function sendPaymentDataToAnet() {
             var secureData = {}, authData = {}, cardData = {};
@@ -76,6 +72,20 @@ These instructions assume integration with the default Heat Clinic Demo Site pro
         }
     </script>
 ```
+
+You'll also want to create an "on click" listener for submit button on the payment form. 
+In our example, we'll create a separate Javascript file `authnet.js` to be loaded later with the following:
+
+```
+$(document).ready(function() {
+    $('#anet_checkout_form_button').on("click", function(e) {
+        e.preventDefault();
+        sendPaymentDataToAnet();
+    });
+});        
+```
+
+> Note: the above sample JS assumes jQuery is loaded
 
 4. Create a Spring MVC Controller to handle the form you created above in order to process the payment nonce and confirm the transaction. It would look something like this:
 
@@ -112,8 +122,11 @@ public class AuthorizeNetCheckoutController extends BroadleafCheckoutController 
                 break;
             }
         }
-        Address address = cart.getPayments().get(0).getBillingAddress();
-        paymentNonce.setBillingAddress(address);
+        
+        if (tempPayment != null){
+            paymentNonce.setBillingAddress(addressService.copyAddress(tempPayment.getBillingAddress()));
+            orderService.removePaymentFromOrder(cart, tempPayment);
+        }
 
         // Create the UNCONFIRMED transaction for the payment
         PaymentTransaction transaction = orderPaymentService.createTransaction();
