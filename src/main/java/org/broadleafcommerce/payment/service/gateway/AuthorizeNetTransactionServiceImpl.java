@@ -176,6 +176,9 @@ public class AuthorizeNetTransactionServiceImpl implements PaymentGatewayTransac
                     transaction.setTransactionType(TransactionTypeEnum.AUTH_CAPTURE_TRANSACTION.value());
                 } else if (transactionType.equals(TransactionType.AUTH_ONLY)) {
                     transaction.setTransactionType(TransactionTypeEnum.AUTH_ONLY_TRANSACTION.value());
+                } else if (transactionType.equals(TransactionType.VOID)) {
+                    transaction.setTransactionType(TransactionTypeEnum.VOID_TRANSACTION.value());
+                    transaction.setRefTransId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID));
                 }
                 transaction.setPayment(paymentType);
                 transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
