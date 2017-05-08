@@ -45,6 +45,18 @@ import javax.annotation.Resource;
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
 import net.authorize.Merchant;
+import net.authorize.api.contract.v1.CreateCustomerProfileRequest;
+import net.authorize.api.contract.v1.CreateCustomerProfileResponse;
+import net.authorize.api.contract.v1.CustomerPaymentProfileType;
+import net.authorize.api.contract.v1.CustomerProfileType;
+import net.authorize.api.contract.v1.CustomerTypeEnum;
+import net.authorize.api.contract.v1.MerchantAuthenticationType;
+import net.authorize.api.contract.v1.MessageTypeEnum;
+import net.authorize.api.contract.v1.OpaqueDataType;
+import net.authorize.api.contract.v1.TransactionRequestType;
+import net.authorize.api.contract.v1.ValidationModeEnum;
+import net.authorize.api.controller.CreateCustomerProfileController;
+import net.authorize.api.controller.base.ApiOperationBase;
 import net.authorize.cim.Result;
 import net.authorize.cim.Transaction;
 import net.authorize.cim.TransactionType;
@@ -72,28 +84,77 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
                 "Must pass 'x_trans_id' value on the additionalFields of the Payment Request DTO");
         
         String previousTransId = (String) requestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName());
-        BasicXmlDocument gatewayResponse = createCustomerFromTransaction(previousTransId, merchant, e);
-        
-        // In order to get Authorize.net to parse the response, I have to create a 'fake' auth.net.cim.Transaction object
-        // to simulate like I actually made the request through the API. Even though I didn't, I can fake out the response
-        // by using the dummy transaction object and setting the 'currentResponse' property on it
-        // The TransactionType passed in here is COMPLETELY inconsequential. If they ever update their 
-        Transaction fakeTransaction = Transaction.createTransaction(merchant, TransactionType.CREATE_CUSTOMER_PAYMENT_PROFILE);
-        Transaction responseTransaction = Transaction.createTransaction(fakeTransaction, gatewayResponse);
-        Result<Transaction> result = Result.createResult(responseTransaction, gatewayResponse);
-
         PaymentResponseDTO paymentResponse = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
-        paymentResponse.rawResponse(result.getTarget().getCurrentResponse().dump());
-        paymentResponse.successful(result.isOk());
-        if (result.isOk()) {
-            paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, result.getCustomerProfileId());
-            paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, result.getCustomerPaymentProfileIdList().get(0));
-        } else {
-            List<Message> messages = result.getMessages();
-            if (CollectionUtils.isNotEmpty(messages)) {
-                paymentResponse.responseMap(Result.ERROR, messages.get(0).getCode());
+        if (requestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR") != null) {
+            TransactionRequestType transaction = new TransactionRequestType();
+            ApiOperationBase.setEnvironment(Environment.SANDBOX);
+            MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
+            merchantAuthenticationType.setName(configuration.getLoginId());
+            merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
+            ApiOperationBase.setMerchantAuthentication(merchantAuthenticationType);
+
+            net.authorize.api.contract.v1.PaymentType paymentType = new net.authorize.api.contract.v1.PaymentType();
+            OpaqueDataType data = new OpaqueDataType();
+            data.setDataDescriptor((String)requestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR"));
+            data.setDataValue((String)requestDTO.getAdditionalFields().get("OPAQUE_DATA_VALUE"));
+            paymentType.setOpaqueData(data);
+            
+            CustomerPaymentProfileType customerPaymentProfileType = new CustomerPaymentProfileType();
+            customerPaymentProfileType.setCustomerType(CustomerTypeEnum.INDIVIDUAL);
+            customerPaymentProfileType.setPayment(paymentType);
+            
+            CustomerProfileType customerProfileType = new CustomerProfileType();
+            customerProfileType.setMerchantCustomerId("M_" + requestDTO.getCustomer().getCustomerId());
+            customerProfileType.setDescription("Profile description for " + requestDTO.getBillTo().getAddressEmail());
+            if (!requestDTO.getBillTo().getAddressEmail().isEmpty()) {
+                customerProfileType.setEmail(requestDTO.getBillTo().getAddressEmail());
             } else {
-                paymentResponse.responseMap(Result.ERROR, result.getResultCode());
+                customerProfileType.setEmail(requestDTO.getCustomer().getEmail());
+            }
+            customerProfileType.getPaymentProfiles().add(customerPaymentProfileType);
+            
+            CreateCustomerProfileRequest apiRequest = new CreateCustomerProfileRequest();
+            apiRequest.setProfile(customerProfileType);
+            if (configuration.getXTestRequest().isEmpty()) {
+                apiRequest.setValidationMode(ValidationModeEnum.LIVE_MODE);
+            } else {
+                apiRequest.setValidationMode(ValidationModeEnum.TEST_MODE);
+            }
+            CreateCustomerProfileController controller = new CreateCustomerProfileController(apiRequest);
+            controller.execute();
+            CreateCustomerProfileResponse response = controller.getApiResponse();
+            
+            paymentResponse.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK));
+            
+            paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, response.getCustomerProfileId());
+            paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, response.getCustomerPaymentProfileIdList().getNumericString().get(0));
+            
+            for(String fieldKey : requestDTO.getAdditionalFields().keySet()) {
+                paymentResponse.responseMap(fieldKey, (String)requestDTO.getAdditionalFields().get(fieldKey));
+            }
+        } else {
+            BasicXmlDocument gatewayResponse = createCustomerFromTransaction(previousTransId, merchant, e);
+            
+            // In order to get Authorize.net to parse the response, I have to create a 'fake' auth.net.cim.Transaction object
+            // to simulate like I actually made the request through the API. Even though I didn't, I can fake out the response
+            // by using the dummy transaction object and setting the 'currentResponse' property on it
+            // The TransactionType passed in here is COMPLETELY inconsequential. If they ever update their 
+            Transaction fakeTransaction = Transaction.createTransaction(merchant, TransactionType.CREATE_CUSTOMER_PAYMENT_PROFILE);
+            Transaction responseTransaction = Transaction.createTransaction(fakeTransaction, gatewayResponse);
+            Result<Transaction> result = Result.createResult(responseTransaction, gatewayResponse);
+            
+            paymentResponse.rawResponse(result.getTarget().getCurrentResponse().dump());
+            paymentResponse.successful(result.isOk());
+            if (result.isOk()) {
+                paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, result.getCustomerProfileId());
+                paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, result.getCustomerPaymentProfileIdList().get(0));
+            } else {
+                List<Message> messages = result.getMessages();
+                if (CollectionUtils.isNotEmpty(messages)) {
+                    paymentResponse.responseMap(Result.ERROR, messages.get(0).getCode());
+                } else {
+                    paymentResponse.responseMap(Result.ERROR, result.getResultCode());
+                }
             }
         }
         
