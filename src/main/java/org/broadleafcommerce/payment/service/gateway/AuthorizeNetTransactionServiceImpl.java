@@ -206,7 +206,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                            .responseMap(AuthNetField.X_AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal())
                            .responseMap(AuthNetField.X_TEST_REQUEST.getFieldName(), configuration.getXTestRequest())
                            .responseMap(AuthNetField.X_CUST_ID.getFieldName(), paymentRequestDTO.getCustomer().getCustomerId())
-                           .responseMap(AuthNetField.X_TRANS_ID.getFieldName(), paymentRequestDTO.getOrderId())
+                           .responseMap(AuthNetField.X_TRANS_ID.getFieldName(), response.getTransactionResponse().getTransId())
                            .responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId())
                            .responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId())
                            .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());

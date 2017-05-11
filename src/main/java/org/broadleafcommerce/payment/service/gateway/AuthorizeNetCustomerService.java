@@ -25,6 +25,7 @@ import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.broadleafcommerce.common.payment.PaymentType;
+import org.broadleafcommerce.common.payment.dto.AddressDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayCustomerService;
@@ -45,8 +46,11 @@ import javax.annotation.Resource;
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
 import net.authorize.Merchant;
+import net.authorize.api.contract.v1.CreateCustomerPaymentProfileRequest;
+import net.authorize.api.contract.v1.CreateCustomerPaymentProfileResponse;
 import net.authorize.api.contract.v1.CreateCustomerProfileRequest;
 import net.authorize.api.contract.v1.CreateCustomerProfileResponse;
+import net.authorize.api.contract.v1.CustomerAddressType;
 import net.authorize.api.contract.v1.CustomerPaymentProfileType;
 import net.authorize.api.contract.v1.CustomerProfileType;
 import net.authorize.api.contract.v1.CustomerTypeEnum;
@@ -55,6 +59,7 @@ import net.authorize.api.contract.v1.MessageTypeEnum;
 import net.authorize.api.contract.v1.OpaqueDataType;
 import net.authorize.api.contract.v1.TransactionRequestType;
 import net.authorize.api.contract.v1.ValidationModeEnum;
+import net.authorize.api.controller.CreateCustomerPaymentProfileController;
 import net.authorize.api.controller.CreateCustomerProfileController;
 import net.authorize.api.controller.base.ApiOperationBase;
 import net.authorize.cim.Result;
@@ -113,21 +118,56 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
             }
             customerProfileType.getPaymentProfiles().add(customerPaymentProfileType);
             
-            CreateCustomerProfileRequest apiRequest = new CreateCustomerProfileRequest();
-            apiRequest.setProfile(customerProfileType);
+            CreateCustomerProfileRequest apiCreateCustomerProfileRequest = new CreateCustomerProfileRequest();
+            apiCreateCustomerProfileRequest.setProfile(customerProfileType);
             if (configuration.getXTestRequest().isEmpty()) {
-                apiRequest.setValidationMode(ValidationModeEnum.LIVE_MODE);
+                apiCreateCustomerProfileRequest.setValidationMode(ValidationModeEnum.LIVE_MODE);
             } else {
-                apiRequest.setValidationMode(ValidationModeEnum.TEST_MODE);
+                apiCreateCustomerProfileRequest.setValidationMode(ValidationModeEnum.TEST_MODE);
             }
-            CreateCustomerProfileController controller = new CreateCustomerProfileController(apiRequest);
+            CreateCustomerProfileController controller = new CreateCustomerProfileController(apiCreateCustomerProfileRequest);
             controller.execute();
             CreateCustomerProfileResponse response = controller.getApiResponse();
             
-            paymentResponse.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK));
+            CreateCustomerPaymentProfileRequest apiCreateCustomerPaymentProfileRequest = new CreateCustomerPaymentProfileRequest();
+            apiCreateCustomerPaymentProfileRequest.setMerchantAuthentication(merchantAuthenticationType);
+            apiCreateCustomerPaymentProfileRequest.setCustomerProfileId(response.getCustomerProfileId());
+            
+            net.authorize.api.contract.v1.PaymentType customerPaymentType = new net.authorize.api.contract.v1.PaymentType();
+            OpaqueDataType opaqueData = new OpaqueDataType();
+            opaqueData.setDataDescriptor((String)requestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR"));
+            opaqueData.setDataValue((String)requestDTO.getAdditionalFields().get("OPAQUE_DATA_VALUE"));
+            customerPaymentType.setOpaqueData(opaqueData);
+            
+            CustomerPaymentProfileType profile = new CustomerPaymentProfileType();
+            
+            AddressDTO billing = requestDTO.getBillTo();
+            
+            CustomerAddressType customerAddress = new CustomerAddressType();
+            customerAddress.setFirstName(billing.getAddressFirstName());
+            customerAddress.setLastName(billing.getAddressLastName());
+            customerAddress.setAddress(billing.getAddressLine1());
+            customerAddress.setCity(billing.getAddressCityLocality());
+            customerAddress.setState(billing.getAddressStateRegion());
+            customerAddress.setZip(billing.getAddressPostalCode());
+            customerAddress.setCountry(billing.getAddressCountryCode());
+            customerAddress.setPhoneNumber(billing.getAddressPhone());
+            profile.setBillTo(customerAddress);
+            
+            profile.setPayment(customerPaymentType);
+            
+            apiCreateCustomerPaymentProfileRequest.setPaymentProfile(profile);
+            
+            CreateCustomerPaymentProfileController cCPPcontroller = new CreateCustomerPaymentProfileController(apiCreateCustomerPaymentProfileRequest);
+            cCPPcontroller.execute();
+            
+            CreateCustomerPaymentProfileResponse cCPPresponse = new CreateCustomerPaymentProfileResponse();
+            cCPPresponse = cCPPcontroller.getApiResponse();
+            
+            paymentResponse.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && cCPPresponse.getMessages().getResultCode().equals(MessageTypeEnum.OK));
             
             paymentResponse.responseMap(MessageConstants.CUSTOMER_PROFILE_ID, response.getCustomerProfileId());
-            paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, response.getCustomerPaymentProfileIdList().getNumericString().get(0));
+            paymentResponse.responseMap(MessageConstants.PAYMENT_PROFILE_ID, cCPPresponse.getCustomerPaymentProfileId());
             
             for(String fieldKey : requestDTO.getAdditionalFields().keySet()) {
                 paymentResponse.responseMap(fieldKey, (String)requestDTO.getAdditionalFields().get(fieldKey));
