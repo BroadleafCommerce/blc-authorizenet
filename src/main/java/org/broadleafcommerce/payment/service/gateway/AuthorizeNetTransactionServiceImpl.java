@@ -235,7 +235,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 
                 CustomerDataType customer = new CustomerDataType();
                 customer.setType(CustomerTypeEnum.INDIVIDUAL);
-                customer.setEmail(paymentRequestDTO.getBillTo().getAddressEmail());
+                customer.setId(customer.getId());
                 
                 transaction.setCustomer(customer);
                 
