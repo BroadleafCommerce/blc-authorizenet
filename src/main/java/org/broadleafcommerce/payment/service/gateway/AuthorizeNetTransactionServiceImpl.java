@@ -239,16 +239,22 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 
                 transaction.setCustomer(customer);
                 
+
+                transaction.setPayment(paymentType);
+                transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
+                
                 if (transactionType.equals(TransactionType.AUTH_CAPTURE)) {
                     transaction.setTransactionType(TransactionTypeEnum.AUTH_CAPTURE_TRANSACTION.value());
                 } else if (transactionType.equals(TransactionType.AUTH_ONLY)) {
                     transaction.setTransactionType(TransactionTypeEnum.AUTH_ONLY_TRANSACTION.value());
                 } else if (transactionType.equals(TransactionType.VOID)) {
                     transaction.setTransactionType(TransactionTypeEnum.VOID_TRANSACTION.value());
-                    transaction.setRefTransId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID));
+                    transaction.setRefTransId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
+                    transaction.setCustomer(null);
+                    transaction.setPayment(null);
+                    transaction.setAmount(null);
                 }
-                transaction.setPayment(paymentType);
-                transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
+                
                 CreateTransactionRequest apiRequest = new CreateTransactionRequest();
                 apiRequest.setTransactionRequest(transaction);
                 
