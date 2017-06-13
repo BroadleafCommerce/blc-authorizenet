@@ -227,8 +227,11 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             responseDTO.customer().email(responseMap.get(ResponseField.EMAIL_ADDRESS));
             responseDTO.paymentTransactionType(paymentTransactionType);
             responseDTO.responseMap(AuthNetField.X_TRANS_ID.getFieldName(), responseMap.get(ResponseField.TRANSACTION_ID));
-            for (String fieldKey : result.getTarget().getMerchantDefinedMap().keySet()) {
-                responseDTO.responseMap(fieldKey, result.getTarget().getMerchantDefinedField(fieldKey));
+            for (String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
+                responseDTO.responseMap(fieldKey, (String) paymentRequestDTO.getAdditionalFields().get(fieldKey));
+            }
+            for (ResponseField fieldKey : gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().keySet()) {
+                responseDTO.responseMap(fieldKey.getFieldName(), gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().get(fieldKey));
             }
             
         } else {
