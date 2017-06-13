@@ -125,6 +125,75 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.CUSTOMER_PROFILE_ID)
                 && paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYMENT_PROFILE_ID)) {
             
+            if (transactionType.equals(TransactionType.VOID)) {
+                TransactionRequestType transactionVoid = new TransactionRequestType();
+                ApiOperationBase.setEnvironment(Environment.SANDBOX);
+                MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
+                merchantAuthenticationType.setName(configuration.getLoginId());
+                merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
+                ApiOperationBase.setMerchantAuthentication(merchantAuthenticationType);
+                
+                transactionVoid.setTransactionType(TransactionTypeEnum.VOID_TRANSACTION.value());
+                transactionVoid.setRefTransId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
+                transactionVoid.setCustomer(null);
+                transactionVoid.setPayment(null);
+                transactionVoid.setAmount(null);
+                
+                CreateTransactionRequest apiRequest = new CreateTransactionRequest();
+                apiRequest.setTransactionRequest(transactionVoid);
+                
+                CreateTransactionController controller = new CreateTransactionController(apiRequest);
+                controller.execute();
+                
+                CreateTransactionResponse response = controller.getApiResponse();
+                
+                responseDTO.paymentTransactionType(paymentTransactionType);
+                responseDTO.amount(new Money(paymentRequestDTO.getTransactionTotal().toString()));
+                responseDTO.orderId(paymentRequestDTO.getOrderId());
+                responseDTO.responseMap(MessageConstants.TRANSACTION_TIME, SystemTime.asDate().toString());
+                responseDTO.responseMap(ResponseField.RESPONSE_CODE.getFieldName(), "" + response.getTransactionResponse().getResponseCode());
+                responseDTO.responseMap(ResponseField.RESPONSE_REASON_CODE.getFieldName(), "" + response.getTransactionResponse().getRawResponseCode());
+                responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal().toString());
+                responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), response.getTransactionResponse().getAuthCode());
+                responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber())
+                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), System.currentTimeMillis()+"")
+                           .responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId())
+                           .responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion())
+                           .responseMap(AuthNetField.X_METHOD.getFieldName(), "CC")
+                           .responseMap(AuthNetField.X_TYPE.getFieldName(), transactionType.getValue())
+                           .responseMap(AuthNetField.X_AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal())
+                           .responseMap(AuthNetField.X_TEST_REQUEST.getFieldName(), configuration.getXTestRequest())
+                           .responseMap(AuthNetField.X_CUST_ID.getFieldName(), paymentRequestDTO.getCustomer().getCustomerId())
+                           .responseMap(AuthNetField.X_TRANS_ID.getFieldName(), response.getTransactionResponse().getTransId())
+                           .responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId())
+                           .responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId())
+                           .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());
+                
+                if(paymentRequestDTO.billToPopulated()) {
+                    responseDTO.responseMap(AuthNetField.X_FIRST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressFirstName())
+                    .responseMap(AuthNetField.X_LAST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressLastName())
+                    .responseMap(AuthNetField.X_ADDRESS.getFieldName(), paymentRequestDTO.getBillTo().getAddressLine1())
+                    .responseMap(AuthNetField.X_CITY.getFieldName(), paymentRequestDTO.getBillTo().getAddressCityLocality())
+                    .responseMap(AuthNetField.X_STATE.getFieldName(), paymentRequestDTO.getBillTo().getAddressStateRegion())
+                    .responseMap(AuthNetField.X_ZIP.getFieldName(), paymentRequestDTO.getBillTo().getAddressPostalCode())
+                    .responseMap(AuthNetField.X_COUNTRY.getFieldName(), paymentRequestDTO.getBillTo().getAddressCountryCode())
+                    .responseMap(AuthNetField.X_EMAIL.getFieldName(), paymentRequestDTO.getBillTo().getAddressEmail() != null ? paymentRequestDTO.getBillTo().getAddressEmail() : paymentRequestDTO.getCustomer().getEmail())
+                    .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
+                }
+                
+                for(String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
+                    responseDTO.responseMap(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
+                }
+                
+                responseDTO.successful(response.getMessages().getResultCode() == MessageTypeEnum.OK);
+                if (!responseDTO.isSuccessful()) {
+                    responseDTO.valid(false);
+                    responseDTO.completeCheckoutOnCallback(false);
+                }
+                
+                return responseDTO;
+            }
+            
             net.authorize.cim.Transaction transaction = merchant.createCIMTransaction(net.authorize.cim.TransactionType.CREATE_CUSTOMER_PROFILE_TRANSACTION);
             transaction.setCustomerProfileId((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CUSTOMER_PROFILE_ID));
             
@@ -157,6 +226,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             responseDTO.amount(new Money(responseMap.get(ResponseField.AMOUNT)));
             responseDTO.customer().email(responseMap.get(ResponseField.EMAIL_ADDRESS));
             responseDTO.paymentTransactionType(paymentTransactionType);
+            responseDTO.responseMap(AuthNetField.X_TRANS_ID.getFieldName(), responseMap.get(ResponseField.TRANSACTION_ID));
         } else {
             if (paymentRequestDTO.getAdditionalFields().containsKey("X_TRANS_ID")) {
                 Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
