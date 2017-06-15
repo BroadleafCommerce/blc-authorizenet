@@ -181,10 +181,6 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
                 }
                 
-                for(String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
-                    responseDTO.responseMap(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
-                }
-                
                 responseDTO.successful(response.getMessages().getResultCode() == MessageTypeEnum.OK);
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
