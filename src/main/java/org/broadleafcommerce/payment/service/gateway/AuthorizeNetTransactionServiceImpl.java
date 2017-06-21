@@ -21,6 +21,7 @@ package org.broadleafcommerce.payment.service.gateway;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
+import org.broadleafcommerce.common.payment.dto.AddressDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentRequestDTO;
 import org.broadleafcommerce.common.payment.dto.PaymentResponseDTO;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayTransactionService;
@@ -48,6 +49,7 @@ import net.authorize.aim.Result;
 import net.authorize.aim.Transaction;
 import net.authorize.api.contract.v1.CreateTransactionRequest;
 import net.authorize.api.contract.v1.CreateTransactionResponse;
+import net.authorize.api.contract.v1.CustomerAddressType;
 import net.authorize.api.contract.v1.CustomerDataType;
 import net.authorize.api.contract.v1.CustomerTypeEnum;
 import net.authorize.api.contract.v1.MerchantAuthenticationType;
@@ -312,8 +314,25 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 
                 transaction.setCustomer(customer);
                 
+                AddressDTO billing = paymentRequestDTO.getBillTo();
+                
+                CustomerAddressType customerAddress = new CustomerAddressType();
+                customerAddress.setFirstName(billing.getAddressFirstName());
+                customerAddress.setLastName(billing.getAddressLastName());
+                customerAddress.setAddress(billing.getAddressLine1());
+                customerAddress.setCity(billing.getAddressCityLocality());
+                customerAddress.setState(billing.getAddressStateRegion());
+                customerAddress.setZip(billing.getAddressPostalCode());
+                customerAddress.setCountry(billing.getAddressCountryCode());
+                customerAddress.setPhoneNumber(billing.getAddressPhone());
+                if (!paymentRequestDTO.getBillTo().getAddressEmail().isEmpty()) {
+                    customerAddress.setEmail(paymentRequestDTO.getBillTo().getAddressEmail());
+                } else {
+                    customerAddress.setEmail(paymentRequestDTO.getCustomer().getEmail());
+                }
 
                 transaction.setPayment(paymentType);
+                transaction.setBillTo(customerAddress);
                 transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
                 
                 if (transactionType.equals(TransactionType.AUTH_CAPTURE)) {

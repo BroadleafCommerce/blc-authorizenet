@@ -104,9 +104,27 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
             data.setDataValue((String)requestDTO.getAdditionalFields().get("OPAQUE_DATA_VALUE"));
             paymentType.setOpaqueData(data);
             
+            AddressDTO billing = requestDTO.getBillTo();
+            
+            CustomerAddressType customerAddress = new CustomerAddressType();
+            customerAddress.setFirstName(billing.getAddressFirstName());
+            customerAddress.setLastName(billing.getAddressLastName());
+            customerAddress.setAddress(billing.getAddressLine1());
+            customerAddress.setCity(billing.getAddressCityLocality());
+            customerAddress.setState(billing.getAddressStateRegion());
+            customerAddress.setZip(billing.getAddressPostalCode());
+            customerAddress.setCountry(billing.getAddressCountryCode());
+            customerAddress.setPhoneNumber(billing.getAddressPhone());
+            if (!requestDTO.getBillTo().getAddressEmail().isEmpty()) {
+                customerAddress.setEmail(requestDTO.getBillTo().getAddressEmail());
+            } else {
+                customerAddress.setEmail(requestDTO.getCustomer().getEmail());
+            }
+            
             CustomerPaymentProfileType customerPaymentProfileType = new CustomerPaymentProfileType();
             customerPaymentProfileType.setCustomerType(CustomerTypeEnum.INDIVIDUAL);
             customerPaymentProfileType.setPayment(paymentType);
+            customerPaymentProfileType.setBillTo(customerAddress);
             
             CustomerProfileType customerProfileType = new CustomerProfileType();
             customerProfileType.setMerchantCustomerId("M_" + requestDTO.getCustomer().getCustomerId());
@@ -141,17 +159,6 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
             
             CustomerPaymentProfileType profile = new CustomerPaymentProfileType();
             
-            AddressDTO billing = requestDTO.getBillTo();
-            
-            CustomerAddressType customerAddress = new CustomerAddressType();
-            customerAddress.setFirstName(billing.getAddressFirstName());
-            customerAddress.setLastName(billing.getAddressLastName());
-            customerAddress.setAddress(billing.getAddressLine1());
-            customerAddress.setCity(billing.getAddressCityLocality());
-            customerAddress.setState(billing.getAddressStateRegion());
-            customerAddress.setZip(billing.getAddressPostalCode());
-            customerAddress.setCountry(billing.getAddressCountryCode());
-            customerAddress.setPhoneNumber(billing.getAddressPhone());
             profile.setBillTo(customerAddress);
             
             profile.setPayment(customerPaymentType);
