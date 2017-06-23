@@ -23,9 +23,12 @@ import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
 import org.springframework.stereotype.Service;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+
 import javax.annotation.Resource;
+
 
 /**
  * @author Chad Harchar (charchar)
@@ -210,4 +213,9 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
         return AuthorizeNetGatewayType.AUTHORIZENET;
     }
 
+    @Override
+    public Boolean isSandbox() {
+        return BLCSystemProperty.resolveBooleanSystemProperty("gateway.authorizenet.sandbox", true);
+    }
+    
 }

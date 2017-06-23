@@ -129,7 +129,11 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             
             if (transactionType.equals(TransactionType.VOID)) {
                 TransactionRequestType transactionVoid = new TransactionRequestType();
-                ApiOperationBase.setEnvironment(Environment.SANDBOX);
+                if (configuration.isSandbox()) {
+                    ApiOperationBase.setEnvironment(Environment.SANDBOX);
+                } else {
+                    ApiOperationBase.setEnvironment(Environment.PRODUCTION);
+                }
                 MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
                 merchantAuthenticationType.setName(configuration.getLoginId());
                 merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
@@ -296,7 +300,11 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 }
             } else if (paymentRequestDTO.getAdditionalFields().containsKey("OPAQUE_DATA_DESCRIPTOR")) {
                 TransactionRequestType transaction = new TransactionRequestType();
-                ApiOperationBase.setEnvironment(Environment.SANDBOX);
+                if (configuration.isSandbox()) {
+                    ApiOperationBase.setEnvironment(Environment.SANDBOX);
+                } else {
+                    ApiOperationBase.setEnvironment(Environment.PRODUCTION);
+                }
                 MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
                 merchantAuthenticationType.setName(configuration.getLoginId());
                 merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());

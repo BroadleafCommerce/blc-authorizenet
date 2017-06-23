@@ -127,5 +127,7 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     * @return String
     */
     public String getXTestRequest();
+    
+    public Boolean isSandbox();
 
 }
