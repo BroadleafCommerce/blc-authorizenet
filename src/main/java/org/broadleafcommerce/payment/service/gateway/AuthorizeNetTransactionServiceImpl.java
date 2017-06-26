@@ -163,7 +163,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal().toString());
                 responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), response.getTransactionResponse().getAuthCode());
                 responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber())
-                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), System.currentTimeMillis()+"")
+                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), transactionVoid.getOrder().getInvoiceNumber())
                            .responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId())
                            .responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion())
                            .responseMap(AuthNetField.X_METHOD.getFieldName(), "CC")
