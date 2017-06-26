@@ -55,6 +55,7 @@ import net.authorize.api.contract.v1.CustomerTypeEnum;
 import net.authorize.api.contract.v1.MerchantAuthenticationType;
 import net.authorize.api.contract.v1.MessageTypeEnum;
 import net.authorize.api.contract.v1.OpaqueDataType;
+import net.authorize.api.contract.v1.OrderType;
 import net.authorize.api.contract.v1.TransactionRequestType;
 import net.authorize.api.contract.v1.TransactionTypeEnum;
 import net.authorize.api.controller.CreateTransactionController;
@@ -299,7 +300,13 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     responseDTO.responseMap(fieldKey, result.getTarget().getMerchantDefinedField(fieldKey));
                 }
             } else if (paymentRequestDTO.getAdditionalFields().containsKey("OPAQUE_DATA_DESCRIPTOR")) {
+                OrderType orderType = new OrderType();
+                orderType.setInvoiceNumber(paymentRequestDTO.getOrderId());
+                orderType.setDescription((paymentRequestDTO.getOrderDescription()));
+
                 TransactionRequestType transaction = new TransactionRequestType();
+                transaction.setOrder(orderType);
+
                 if (configuration.isSandbox()) {
                     ApiOperationBase.setEnvironment(Environment.SANDBOX);
                 } else {
@@ -319,6 +326,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 CustomerDataType customer = new CustomerDataType();
                 customer.setType(CustomerTypeEnum.INDIVIDUAL);
                 customer.setId(paymentRequestDTO.getCustomer().getCustomerId());
+                customer.setEmail(paymentRequestDTO.getCustomer().getEmail());
                 
                 transaction.setCustomer(customer);
                 
@@ -333,8 +341,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 customerAddress.setZip(billing.getAddressPostalCode());
                 customerAddress.setCountry(billing.getAddressCountryCode());
                 customerAddress.setPhoneNumber(billing.getAddressPhone());
-                if (!paymentRequestDTO.getBillTo().getAddressEmail().isEmpty()) {
-                    customerAddress.setEmail(paymentRequestDTO.getBillTo().getAddressEmail());
+                if (!billing.getAddressEmail().isEmpty()) {
+                    customerAddress.setEmail(billing.getAddressEmail());
                 } else {
                     customerAddress.setEmail(paymentRequestDTO.getCustomer().getEmail());
                 }
@@ -372,7 +380,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal().toString());
                 responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), response.getTransactionResponse().getAuthCode());
                 responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber())
-                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), System.currentTimeMillis()+"")
+                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), transaction.getOrder().getInvoiceNumber())
                            .responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId())
                            .responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion())
                            .responseMap(AuthNetField.X_METHOD.getFieldName(), "CC")
@@ -407,7 +415,9 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     responseDTO.completeCheckoutOnCallback(false);
                 }
                 
-            } else {            
+            } else {
+
+                throw new IllegalStateException( "Cannot determine action from additionalFields: \n" + paymentRequestDTO.getAdditionalFields());
 
             }
         }
