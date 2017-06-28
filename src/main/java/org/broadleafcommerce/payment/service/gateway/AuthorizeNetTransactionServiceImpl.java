@@ -211,6 +211,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             paymentTransaction.setOrder(order);
             order.setTotalAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
             order.setInvoiceNumber(paymentRequestDTO.getOrderId());
+            order.setDescription(paymentRequestDTO.getOrderDescription());
             
             ShippingCharges shipping = ShippingCharges.createShippingCharges();
             order.setShippingCharges(shipping);
