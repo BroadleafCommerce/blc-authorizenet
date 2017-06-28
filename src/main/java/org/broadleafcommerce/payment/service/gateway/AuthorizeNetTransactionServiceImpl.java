@@ -43,6 +43,7 @@ import javax.annotation.Resource;
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
 import net.authorize.Merchant;
+import net.authorize.ResponseCode;
 import net.authorize.ResponseField;
 import net.authorize.TransactionType;
 import net.authorize.aim.Result;
@@ -53,7 +54,6 @@ import net.authorize.api.contract.v1.CustomerAddressType;
 import net.authorize.api.contract.v1.CustomerDataType;
 import net.authorize.api.contract.v1.CustomerTypeEnum;
 import net.authorize.api.contract.v1.MerchantAuthenticationType;
-import net.authorize.api.contract.v1.MessageTypeEnum;
 import net.authorize.api.contract.v1.OpaqueDataType;
 import net.authorize.api.contract.v1.OrderType;
 import net.authorize.api.contract.v1.TransactionRequestType;
@@ -188,7 +188,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
                 }
                 
-                responseDTO.successful(response.getMessages().getResultCode() == MessageTypeEnum.OK);
+                responseDTO.successful(response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
@@ -409,7 +409,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     responseDTO.responseMap(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
                 }
                 
-                responseDTO.successful(response.getMessages().getResultCode() == MessageTypeEnum.OK);
+                responseDTO.successful(response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
