@@ -305,7 +305,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             } else if (paymentRequestDTO.getAdditionalFields().containsKey("OPAQUE_DATA_DESCRIPTOR")) {
                 OrderType orderType = new OrderType();
                 orderType.setInvoiceNumber(paymentRequestDTO.getOrderId());
-                orderType.setDescription((paymentRequestDTO.getOrderDescription()));
+                orderType.setDescription(paymentRequestDTO.getOrderDescription());
 
                 TransactionRequestType transaction = new TransactionRequestType();
                 transaction.setOrder(orderType);
