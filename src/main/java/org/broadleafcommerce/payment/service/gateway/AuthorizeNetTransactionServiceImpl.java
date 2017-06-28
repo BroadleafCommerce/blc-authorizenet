@@ -190,7 +190,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 }
                 
                 responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
-                    response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
+                    Integer.toString(ResponseCode.APPROVED.getCode()).equals(response.getTransactionResponse().getResponseCode()));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
@@ -412,7 +412,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 }
                 
                 responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
-                    response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
+                    Integer.toString(ResponseCode.APPROVED.getCode()).equals(response.getTransactionResponse().getResponseCode()));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
