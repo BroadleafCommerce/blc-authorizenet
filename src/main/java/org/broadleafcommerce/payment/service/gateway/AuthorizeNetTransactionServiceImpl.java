@@ -54,6 +54,7 @@ import net.authorize.api.contract.v1.CustomerAddressType;
 import net.authorize.api.contract.v1.CustomerDataType;
 import net.authorize.api.contract.v1.CustomerTypeEnum;
 import net.authorize.api.contract.v1.MerchantAuthenticationType;
+import net.authorize.api.contract.v1.MessageTypeEnum;
 import net.authorize.api.contract.v1.OpaqueDataType;
 import net.authorize.api.contract.v1.OrderType;
 import net.authorize.api.contract.v1.TransactionRequestType;
@@ -188,7 +189,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
                 }
                 
-                responseDTO.successful(response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
+                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
+                    response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
@@ -409,7 +411,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     responseDTO.responseMap(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
                 }
                 
-                responseDTO.successful(response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
+                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
+                    response.getTransactionResponse().getResponseCode().equals(ResponseCode.APPROVED));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
