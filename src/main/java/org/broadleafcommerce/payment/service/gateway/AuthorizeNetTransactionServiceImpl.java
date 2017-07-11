@@ -18,6 +18,8 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.payment.PaymentTransactionType;
 import org.broadleafcommerce.common.payment.PaymentType;
@@ -34,11 +36,13 @@ import org.broadleafcommerce.vendor.authorizenet.util.AuthorizeNetUtil;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.annotation.Resource;
+import javax.xml.bind.JAXBException;
 
 import net.authorize.AuthNetField;
 import net.authorize.Environment;
@@ -65,10 +69,13 @@ import net.authorize.data.Order;
 import net.authorize.data.ShippingCharges;
 import net.authorize.data.cim.PaymentTransaction;
 import net.authorize.data.creditcard.CreditCard;
+import net.authorize.util.XmlUtility;
 
 @Service("blAuthorizeNetTransactionService")
 public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTransactionService implements PaymentGatewayTransactionService {
 
+    private static final Log LOG = LogFactory.getLog(AuthorizeNetTransactionServiceImpl.class);
+    
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;
     
@@ -118,8 +125,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
     }
 
     private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
-        Environment e = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
-        Merchant merchant = Merchant.createMerchant(e, configuration.getLoginId(), configuration.getTransactionKey());
+        Environment env = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
+        Merchant merchant = Merchant.createMerchant(env, configuration.getLoginId(), configuration.getTransactionKey());
 
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         
@@ -373,6 +380,11 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 
                 CreateTransactionResponse response = controller.getApiResponse();
                 
+                try {
+                    responseDTO.rawResponse(XmlUtility.getXml(response));
+                } catch (IOException | JAXBException e) {
+                    LOG.error("Could not serialize raw response", e);
+                }
                 responseDTO.paymentTransactionType(paymentTransactionType);
                 responseDTO.amount(new Money(paymentRequestDTO.getTransactionTotal().toString()));
                 responseDTO.orderId(paymentRequestDTO.getOrderId());
