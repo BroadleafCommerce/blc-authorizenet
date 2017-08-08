@@ -18,6 +18,7 @@
 
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.broadleafcommerce.common.money.Money;
@@ -351,7 +352,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 customerAddress.setZip(billing.getAddressPostalCode());
                 customerAddress.setCountry(billing.getAddressCountryCode());
                 customerAddress.setPhoneNumber(billing.getAddressPhone());
-                if (!billing.getAddressEmail().isEmpty()) {
+                if (StringUtils.isNotEmpty(billing.getAddressEmail())) {
                     customerAddress.setEmail(billing.getAddressEmail());
                 } else {
                     customerAddress.setEmail(paymentRequestDTO.getCustomer().getEmail());
