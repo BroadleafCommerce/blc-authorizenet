@@ -371,6 +371,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     transaction.setCustomer(null);
                     transaction.setPayment(null);
                     transaction.setAmount(null);
+                } else if (transactionType.equals(TransactionType.PRIOR_AUTH_CAPTURE)) {
+                    transaction.setTransactionType(TransactionTypeEnum.PRIOR_AUTH_CAPTURE_TRANSACTION.value());
                 }
                 
                 CreateTransactionRequest apiRequest = new CreateTransactionRequest();
