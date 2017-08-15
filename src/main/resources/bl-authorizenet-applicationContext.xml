@@ -59,5 +59,10 @@
         <property name="collectionRef" value="blAuthorizeNetVariableExpressions"/>
         <property name="targetRef" value="blVariableExpressions"/>
     </bean>
+    
+    <bean class="org.broadleafcommerce.common.logging.ModuleLifecycleLoggingBean">
+        <property name="moduleName" value="Authorizenet" />
+        <property name="lifeCycleEvent" value="LOADING" />
+    </bean>
 
 </beans>

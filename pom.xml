@@ -13,7 +13,7 @@
     <version>2.6.8-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <blc.version>5.0.0-GA</blc.version>
+        <blc.version>5.0.12-SNAPSHOT</blc.version>
         <project.uri>${user.dir}</project.uri>
     </properties>
     <scm>
@@ -127,7 +127,6 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
-            <version>3.2.2.RELEASE</version>
             <type>jar</type>
             <scope>test</scope>
         </dependency>

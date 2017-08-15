@@ -17,11 +17,13 @@
  */
 package org.broadleafcommerce.payment.service.gateway;
 
+import org.broadleafcommerce.common.config.service.SystemPropertiesService;
 import org.broadleafcommerce.common.payment.PaymentGatewayType;
 import org.broadleafcommerce.common.payment.service.AbstractPaymentGatewayConfiguration;
-import org.broadleafcommerce.common.util.BLCSystemProperty;
 import org.broadleafcommerce.common.web.BaseUrlResolver;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetGatewayType;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.net.URI;
@@ -38,6 +40,10 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Resource(name = "blBaseUrlResolver")
     protected BaseUrlResolver urlResolver;
+    
+    @Autowired
+    @Qualifier("blSystemPropertiesService")
+    protected SystemPropertiesService propertiesService;
 
     protected int failureReportingThreshold = 1;
 
@@ -45,32 +51,32 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getLoginId() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.loginId");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.loginId");
     }
 
     @Override
     public String getClientKey() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.clientKey");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.clientKey");
     }
 
     @Override
     public String getTransactionKey() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.transactionKey");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.transactionKey");
     }
 
     @Override
     public String getMd5Key() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.merchantMd5Key");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.merchantMd5Key");
     }
 
     @Override
     public String getTransactionVersion() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.transactionVersion");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.transactionVersion");
     }
 
     @Override
     public String getResponseUrl() {
-        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.responseUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.authorizenet.responseUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -86,7 +92,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getConfirmUrl() {
-        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.confirmUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.authorizenet.confirmUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -102,7 +108,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getErrorUrl() {
-        String url = BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.errorUrl");
+        String url = propertiesService.resolveSystemProperty("gateway.authorizenet.errorUrl");
         try {
             URI u = new URI(url);
             if (u.isAbsolute()) {
@@ -118,7 +124,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getServerUrl() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.serverUrl");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.serverUrl");
     }
     
     @Override
@@ -130,7 +136,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getXTestRequest() {
-        return BLCSystemProperty.resolveSystemProperty("gateway.authorizenet.xTestRequest");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.xTestRequest");
     }
 
     @Override
@@ -215,7 +221,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public Boolean isSandbox() {
-        return BLCSystemProperty.resolveBooleanSystemProperty("gateway.authorizenet.sandbox", true);
+        return propertiesService.resolveBooleanSystemProperty("gateway.authorizenet.sandbox", true);
     }
     
 }
