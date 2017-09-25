@@ -223,5 +223,10 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
     public Boolean isSandbox() {
         return propertiesService.resolveBooleanSystemProperty("gateway.authorizenet.sandbox", true);
     }
+
+    @Override
+    public String getAcceptJsUrl() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.accecptJsUrl");
+    }
     
 }

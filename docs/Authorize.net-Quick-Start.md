@@ -14,7 +14,13 @@ These instructions assume integration with the default Heat Clinic Demo Site pro
 1. Make sure the Authorize.net JS library is loaded on your checkout page:
 
 ```html
-<script src="https://jstest.authorize.net/v1/Accept.js"></script>
+
+<!-- For Sandbox/Testing, use: -->
+    <script type="text/javascript" src="https://jstest.authorize.net/v1/Accept.js" charset="utf-8"></script>
+<!-- For Production, use: -->
+    <script type="text/javascript" src="https://js.authorize.net/v1/Accept.js" charset="utf-8"></script>
+<!-- To resolve the url from the gateway.authorizenet.accecptJsUrl system variable, use: -->
+    <script type="text/javascript" th:src="${#authorizenet.getAcceptJsUrl()}" charset="utf-8"></script>
 ```
 
 2. Modify the Payment Form on your checkout page to look something like:
