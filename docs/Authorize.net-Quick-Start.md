@@ -19,7 +19,7 @@ These instructions assume integration with the default Heat Clinic Demo Site pro
     <script type="text/javascript" src="https://jstest.authorize.net/v1/Accept.js" charset="utf-8"></script>
 <!-- For Production, use: -->
     <script type="text/javascript" src="https://js.authorize.net/v1/Accept.js" charset="utf-8"></script>
-<!-- To resolve the url from the gateway.authorizenet.accecptJsUrl system variable, use: -->
+<!-- To resolve the url from the gateway.authorizenet.acceptJsUrl system variable, use: -->
     <script type="text/javascript" th:src="${#authorizenet.getAcceptJsUrl()}" charset="utf-8"></script>
 ```
 

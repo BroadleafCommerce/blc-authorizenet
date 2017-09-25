@@ -226,7 +226,7 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
 
     @Override
     public String getAcceptJsUrl() {
-        return propertiesService.resolveSystemProperty("gateway.authorizenet.accecptJsUrl");
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.acceptJsUrl", "https://js.authorize.net/v1/Accept.js");
     }
     
 }

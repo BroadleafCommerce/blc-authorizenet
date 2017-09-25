@@ -49,7 +49,7 @@ You will need to enter the following key/value pairs in the appropriate location
 ### common.properties
     gateway.authorizenet.transactionVersion=3.1
     gateway.authorizenet.sandbox=true
-    gateway.authorizenet.accecptJsUrl=https://jstest.authorize.net/v1/Accept.js
+    gateway.authorizenet.acceptJsUrl=https://jstest.authorize.net/v1/Accept.js
 
 ### local.properties, development.properties, integrationdev.properties, integrationqa.properties
     gateway.authorizenet.loginId=?
@@ -72,6 +72,6 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.merchantMd5Key=?   
     gateway.authorizenet.serverUrl=https://secure2.authorize.net/gateway/transact.dll
     gateway.authorizenet.sandbox=false
-    gateway.authorizenet.accecptJsUrl=https://js.authorize.net/v1/Accept.js
+    gateway.authorizenet.acceptJsUrl=https://js.authorize.net/v1/Accept.js
 
 Now that you have your environment set up, let's begin setting up the [[Authorize.net Quick Start]].
