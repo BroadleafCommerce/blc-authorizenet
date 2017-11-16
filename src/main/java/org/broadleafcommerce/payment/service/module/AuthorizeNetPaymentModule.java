@@ -16,13 +16,9 @@
 
 package org.broadleafcommerce.payment.service.module;
 
-import net.authorize.ResponseField;
-import net.authorize.sim.Result;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.broadleafcommerce.common.money.Money;
 import org.broadleafcommerce.common.persistence.EntityConfiguration;
 import org.broadleafcommerce.common.time.SystemTime;
 import org.broadleafcommerce.core.order.domain.FulfillmentGroup;
@@ -43,12 +39,34 @@ import org.broadleafcommerce.profile.core.service.CountryService;
 import org.broadleafcommerce.profile.core.service.CustomerService;
 import org.broadleafcommerce.profile.core.service.StateService;
 import org.broadleafcommerce.vendor.authorizenet.service.payment.AuthorizeNetPaymentService;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.util.Assert;
+
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
 
 import javax.annotation.Resource;
 
-import java.util.HashMap;
-import java.util.Map;
+import net.authorize.Environment;
+import net.authorize.ResponseCode;
+import net.authorize.ResponseField;
+import net.authorize.api.contract.v1.CreateTransactionRequest;
+import net.authorize.api.contract.v1.CreateTransactionResponse;
+import net.authorize.api.contract.v1.CustomerAddressType;
+import net.authorize.api.contract.v1.CustomerDataType;
+import net.authorize.api.contract.v1.CustomerTypeEnum;
+import net.authorize.api.contract.v1.MerchantAuthenticationType;
+import net.authorize.api.contract.v1.MessageTypeEnum;
+import net.authorize.api.contract.v1.OpaqueDataType;
+import net.authorize.api.contract.v1.OrderType;
+import net.authorize.api.contract.v1.TransactionRequestType;
+import net.authorize.api.contract.v1.TransactionTypeEnum;
+import net.authorize.api.controller.CreateTransactionController;
+import net.authorize.api.controller.base.ApiOperationBase;
+import net.authorize.sim.Result;
+
+import static org.broadleafcommerce.core.payment.service.type.TransactionType.AUTHORIZEANDDEBIT;
 
 /**
  * @author elbertbautista
@@ -67,6 +85,14 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
     
     @Resource(name="blEntityConfiguration")
     protected EntityConfiguration entityConfiguration;
+
+    @Value("${authorizenet.is_production:false}")
+    protected boolean isProduction;
+
+    @Value("${authorizenet.api.login.id}")
+    protected String loginId;
+    @Value("${authorizenet.transaction.key}")
+    protected String transactionKey;
 
     @Override
     public PaymentResponseItem authorize(PaymentContext paymentContext) throws PaymentException {
@@ -93,7 +119,97 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
 
         Assert.isTrue(paymentInfo.getRequestParameterMap() != null && !paymentInfo.getRequestParameterMap().isEmpty(), "Must set the Request Parameter Map on the PaymentInfo instance.");
 
-        return buildBasicDPMResponse(paymentContext);
+        PaymentResponseItem paymentResponseItem = doAuthorizeAndDebitWithToken(paymentContext);
+        Map<String, String[]> requestParameterMap = paymentContext.getPaymentInfo().getRequestParameterMap();
+        saveAnonymousCustomerInfo(paymentContext, paymentResponseItem, flattenMap(requestParameterMap));
+        return paymentResponseItem;
+    }
+
+    private Map<String,String> flattenMap(Map<String, String[]> requestParameterMap) {
+        Iterator<Map.Entry<String, String[]>> iterator = requestParameterMap.entrySet().iterator();
+        Map<String,String> result = new HashMap<String, String>();
+        while (iterator.hasNext()){
+            Map.Entry<String, String[]> next = iterator.next();
+            result.put(next.getKey(),next.getValue()!=null && next.getValue().length>0?next.getValue()[0]:"");
+        }
+        return result;
+    }
+
+    private PaymentResponseItem doAuthorizeAndDebitWithToken(PaymentContext paymentContext){
+        OrderType orderType = new OrderType();
+
+        Order order = paymentContext.getPaymentInfo().getOrder();
+        orderType.setInvoiceNumber(String.valueOf(order.getId()));
+        orderType.setDescription(order.getName());
+
+        TransactionRequestType transaction = new TransactionRequestType();
+        transaction.setOrder(orderType);
+
+        if (!isProduction) {
+            ApiOperationBase.setEnvironment(Environment.SANDBOX);
+        } else {
+            ApiOperationBase.setEnvironment(Environment.PRODUCTION);
+        }
+        MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
+        merchantAuthenticationType.setName(loginId);
+        merchantAuthenticationType.setTransactionKey(transactionKey);
+        ApiOperationBase.setMerchantAuthentication(merchantAuthenticationType);
+
+        net.authorize.api.contract.v1.PaymentType paymentType = new net.authorize.api.contract.v1.PaymentType();
+        OpaqueDataType data = new OpaqueDataType();
+        data.setDataDescriptor((String)paymentContext.getPaymentInfo().getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR"));
+        data.setDataValue((String)paymentContext.getPaymentInfo().getAdditionalFields().get("OPAQUE_DATA_VALUE"));
+        paymentType.setOpaqueData(data);
+
+        CustomerDataType customer = new CustomerDataType();
+        customer.setType(CustomerTypeEnum.INDIVIDUAL);
+        customer.setId(String.valueOf(order.getCustomer().getId()));
+        customer.setEmail(order.getEmailAddress());
+
+        transaction.setCustomer(customer);
+
+        Address address = paymentContext.getPaymentInfo().getAddress();
+
+        CustomerAddressType customerAddress = new CustomerAddressType();
+        customerAddress.setFirstName(address.getFirstName());
+        customerAddress.setLastName(address.getLastName());
+        customerAddress.setAddress(address.getAddressLine1());
+        customerAddress.setCity(address.getCity());
+        customerAddress.setState(address.getState().getAbbreviation());
+        customerAddress.setZip(address.getPostalCode());
+        customerAddress.setCountry(address.getCountry().getName());
+        customerAddress.setPhoneNumber(address.getPrimaryPhone());
+        if (StringUtils.isNotEmpty(address.getEmailAddress())) {
+            customerAddress.setEmail(address.getEmailAddress());
+        } else {
+            customerAddress.setEmail(order.getEmailAddress());
+        }
+
+        transaction.setPayment(paymentType);
+        transaction.setBillTo(customerAddress);
+        transaction.setAmount(paymentContext.getPaymentInfo().getAmount().getAmount());
+        transaction.setTransactionType(TransactionTypeEnum.AUTH_CAPTURE_TRANSACTION.value());
+
+        CreateTransactionRequest apiRequest = new CreateTransactionRequest();
+        apiRequest.setTransactionRequest(transaction);
+
+        CreateTransactionController controller = new CreateTransactionController(apiRequest);
+        controller.execute();
+
+        CreateTransactionResponse response = controller.getApiResponse();
+        PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
+        responseItem.setProcessorResponseText(response.getTransactionResponse().getRawResponseCode());
+
+        responseItem.setTransactionTimestamp(SystemTime.asDate());
+        responseItem.setProcessorResponseCode(response.getTransactionResponse().getResponseCode());
+        responseItem.setTransactionType(AUTHORIZEANDDEBIT);
+        responseItem.setAmountPaid(paymentContext.getPaymentInfo().getAmount());
+        responseItem.setTransactionId(response.getTransactionResponse().getTransId());
+        responseItem.setReferenceNumber(response.getRefId());
+        responseItem.setTransactionSuccess(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) &&
+                Integer.toString(ResponseCode.APPROVED.getCode()).equals(response.getTransactionResponse().getResponseCode()));
+
+        return responseItem;
     }
 
     @Override
@@ -111,39 +227,13 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
         throw new PaymentException("The balance method is not supported by this org.broadleafcommerce.payment.service.module.AuthorizeNetPaymentModule");
     }
 
-    protected PaymentResponseItem buildBasicDPMResponse(PaymentContext paymentContext) {
-        Result result = authorizeNetPaymentService.createResult(paymentContext.getPaymentInfo().getRequestParameterMap());
 
-        if (LOG.isDebugEnabled()){
-            LOG.debug("Amount               : " + result.getResponseMap().get(ResponseField.AMOUNT.getFieldName()));
-            LOG.debug("Response Code        : " + result.getResponseCode());
-            LOG.debug("Response Reason Code : " + result.getReasonResponseCode().getResponseReasonCode());
-            LOG.debug("Response Reason Text : " + result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
-            LOG.debug("Transaction ID       : " + result.getResponseMap().get(ResponseField.TRANSACTION_ID.getFieldName()));
-        }
-
-        setBillingInfo(paymentContext, result);
-        setShippingInfo(paymentContext, result);
-        setPaymentInfoAdditionalFields(paymentContext, result);
-
-        PaymentResponseItem responseItem = entityConfiguration.createEntityInstance(PaymentResponseItem.class.getName(), PaymentResponseItem.class);
-        responseItem.setTransactionSuccess(isValidTransaction(result));
-        responseItem.setTransactionTimestamp(SystemTime.asDate());
-        responseItem.setAmountPaid(new Money(result.getResponseMap().get(ResponseField.AMOUNT.getFieldName())));
-        responseItem.setProcessorResponseCode(result.getResponseCode().getCode() + "");
-        responseItem.setProcessorResponseText(result.getResponseMap().get(ResponseField.RESPONSE_REASON_TEXT.getFieldName()));
-        setPaymentResponseAdditionalFields(paymentContext, responseItem, result);
-
-        saveAnonymousCustomerInfo(paymentContext, responseItem, result);
-
-        return responseItem;
-    }
 
     protected boolean isValidTransaction(Result result){
        return result.isAuthorizeNet() && result.isApproved();
     }
 
-    protected void saveAnonymousCustomerInfo(PaymentContext paymentContext, PaymentResponseItem responseItem, Result result) {
+    protected void saveAnonymousCustomerInfo(PaymentContext paymentContext, PaymentResponseItem responseItem, Map<String, String> result) {
         if (responseItem.getTransactionSuccess()) {
             if (LOG.isDebugEnabled()){
                 LOG.debug("Fill out a few customer values for anonymous customers");
@@ -151,14 +241,14 @@ public class AuthorizeNetPaymentModule implements PaymentModule {
 
             Order order = paymentContext.getPaymentInfo().getOrder();
             Customer customer = order.getCustomer();
-            if (StringUtils.isEmpty(customer.getFirstName()) && result.getResponseMap().get(ResponseField.FIRST_NAME.getFieldName()) != null) {
-                customer.setFirstName(result.getResponseMap().get(ResponseField.FIRST_NAME.getFieldName()));
+            if (StringUtils.isEmpty(customer.getFirstName()) && result.get(ResponseField.FIRST_NAME.getFieldName()) != null) {
+                customer.setFirstName(result.get(ResponseField.FIRST_NAME.getFieldName()));
             }
-            if (StringUtils.isEmpty(customer.getLastName()) && result.getResponseMap().get(ResponseField.LAST_NAME.getFieldName()) != null) {
-                customer.setLastName(result.getResponseMap().get(ResponseField.LAST_NAME.getFieldName()));
+            if (StringUtils.isEmpty(customer.getLastName()) && result.get(ResponseField.LAST_NAME.getFieldName()) != null) {
+                customer.setLastName(result.get(ResponseField.LAST_NAME.getFieldName()));
             }
-            if (StringUtils.isEmpty(customer.getEmailAddress()) && result.getResponseMap().get(ResponseField.EMAIL_ADDRESS.getFieldName()) != null) {
-                customer.setEmailAddress(result.getResponseMap().get(ResponseField.EMAIL_ADDRESS.getFieldName()));
+            if (StringUtils.isEmpty(customer.getEmailAddress()) && result.get(ResponseField.EMAIL_ADDRESS.getFieldName()) != null) {
+                customer.setEmailAddress(result.get(ResponseField.EMAIL_ADDRESS.getFieldName()));
             }
             customerService.saveCustomer(customer, false);
         }
