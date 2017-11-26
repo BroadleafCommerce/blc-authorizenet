@@ -207,6 +207,19 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
         
         return paymentResponse;
     }
+    
+    protected Merchant getAuthorizenetMerchant(PaymentRequestDTO paymentRequestDTO) {
+        Environment env = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
+        Merchant merchant = Merchant.createMerchant(env, configuration.getLoginId(), configuration.getTransactionKey());
+        return merchant;
+    }
+    
+    protected MerchantAuthenticationType getMerchantAuthentication(PaymentRequestDTO paymentRequestDTO) {
+        MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
+        merchantAuthenticationType.setName(configuration.getLoginId());
+        merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
+        return merchantAuthenticationType;
+    }
 
     @Override
     public PaymentResponseDTO updateGatewayCustomer(PaymentRequestDTO requestDTO) throws PaymentException {

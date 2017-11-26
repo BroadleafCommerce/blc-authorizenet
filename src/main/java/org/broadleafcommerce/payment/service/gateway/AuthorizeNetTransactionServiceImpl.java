@@ -125,10 +125,9 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
         return common(paymentRequestDTO, TransactionType.VOID, PaymentTransactionType.VOID);
     }
 
-    private PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
-        Environment env = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
-        Merchant merchant = Merchant.createMerchant(env, configuration.getLoginId(), configuration.getTransactionKey());
-
+    protected PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
+        Merchant merchant = getAuthorizenetMerchant(paymentRequestDTO);
+        
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
         
         parseOutConsolidatedTokenField(paymentRequestDTO);
@@ -318,16 +317,6 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 TransactionRequestType transaction = new TransactionRequestType();
                 transaction.setOrder(orderType);
 
-                if (configuration.isSandbox()) {
-                    ApiOperationBase.setEnvironment(Environment.SANDBOX);
-                } else {
-                    ApiOperationBase.setEnvironment(Environment.PRODUCTION);
-                }
-                MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
-                merchantAuthenticationType.setName(configuration.getLoginId());
-                merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
-                ApiOperationBase.setMerchantAuthentication(merchantAuthenticationType);
-
                 net.authorize.api.contract.v1.PaymentType paymentType = new net.authorize.api.contract.v1.PaymentType();
                 OpaqueDataType data = new OpaqueDataType();
                 data.setDataDescriptor((String)paymentRequestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR"));
@@ -378,9 +367,12 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 
                 CreateTransactionRequest apiRequest = new CreateTransactionRequest();
                 apiRequest.setTransactionRequest(transaction);
+                apiRequest.setMerchantAuthentication(getMerchantAuthentication(paymentRequestDTO));
                 
                 CreateTransactionController controller = new CreateTransactionController(apiRequest);
-                controller.execute();
+                
+                net.authorize.Environment authnetEnv = configuration.isSandbox() ? net.authorize.Environment.SANDBOX : net.authorize.Environment.PRODUCTION;
+                controller.execute(authnetEnv);
                 
                 CreateTransactionResponse response = controller.getApiResponse();
                 
@@ -443,6 +435,24 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
 
         return responseDTO;
 
+    }
+
+    /**
+     * Used for creating transactions from the CIM API as well as from the now-deprecated relay-response URL.
+     * In later versions of this module this will be replaced with {@link #getMerchantAuthentication(PaymentRequestDTO)}
+     * when support for the transparent redirect is removed.
+     */
+    protected Merchant getAuthorizenetMerchant(PaymentRequestDTO paymentRequestDTO) {
+        Environment env = Environment.createEnvironment(configuration.getServerUrl(), configuration.getXMLBaseUrl());
+        Merchant merchant = Merchant.createMerchant(env, configuration.getLoginId(), configuration.getTransactionKey());
+        return merchant;
+    }
+    
+    protected MerchantAuthenticationType getMerchantAuthentication(PaymentRequestDTO paymentRequestDTO) {
+        MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
+        merchantAuthenticationType.setName(configuration.getLoginId());
+        merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
+        return merchantAuthenticationType;
     }
 
     /**
