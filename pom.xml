@@ -11,7 +11,7 @@
     <artifactId>broadleaf-authorizenet</artifactId>
     <name>BroadleafCommerce Authorize.net</name>
     <description>BroadleafCommerce Authorize.net</description>
-    <version>2.0.4-SNAPSHOT</version>
+    <version>2.0.3-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>2.0.7-GA</blc.version>
