@@ -60,6 +60,18 @@
             <timezone>-6</timezone>
         </developer>
     </developers>
+    <repositories>
+        <repository>
+            <id>releases</id>
+            <name>public releases</name>
+            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/public/</url>
+        </repository>
+        <repository>
+            <id>snapshots</id>
+            <name>public snapshots</name>
+            <url>http://nexus.broadleafcommerce.org/nexus/content/repositories/snapshots/</url>
+        </repository>
+    </repositories>
     <build>
         <pluginManagement>
             <plugins>
@@ -305,8 +317,7 @@
         <dependency>
             <groupId>net.authorize</groupId>
             <artifactId>anet-java-sdk</artifactId>
-            <version>1.4.6</version>
-            <optional>true</optional>
+            <version>1.9.3</version>
         </dependency>
     </dependencies>
 </project>
