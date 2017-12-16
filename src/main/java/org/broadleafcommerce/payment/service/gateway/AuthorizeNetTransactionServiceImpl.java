@@ -170,19 +170,19 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(ResponseField.RESPONSE_REASON_CODE.getFieldName(), "" + response.getTransactionResponse().getRawResponseCode());
                 responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal().toString());
                 responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), response.getTransactionResponse().getAuthCode());
-                responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber())
-                           .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), transactionVoid.getOrder().getInvoiceNumber())
-                           .responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId())
-                           .responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion())
-                           .responseMap(AuthNetField.X_METHOD.getFieldName(), "CC")
-                           .responseMap(AuthNetField.X_TYPE.getFieldName(), transactionType.getValue())
-                           .responseMap(AuthNetField.X_AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal())
-                           .responseMap(AuthNetField.X_TEST_REQUEST.getFieldName(), configuration.getXTestRequest())
-                           .responseMap(AuthNetField.X_CUST_ID.getFieldName(), paymentRequestDTO.getCustomer().getCustomerId())
-                           .responseMap(AuthNetField.X_TRANS_ID.getFieldName(), response.getTransactionResponse().getTransId())
-                           .responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId())
-                           .responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId())
-                           .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());
+                responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber());
+                responseDTO.responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), (String)paymentRequestDTO.getAdditionalFields().get("x_invoice_num"));
+                responseDTO.responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId());
+                responseDTO.responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion());
+                responseDTO.responseMap(AuthNetField.X_METHOD.getFieldName(), "CC");
+                responseDTO.responseMap(AuthNetField.X_TYPE.getFieldName(), transactionType.getValue());
+                responseDTO.responseMap(AuthNetField.X_AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal());
+                responseDTO.responseMap(AuthNetField.X_TEST_REQUEST.getFieldName(), configuration.getXTestRequest());
+                responseDTO.responseMap(AuthNetField.X_CUST_ID.getFieldName(), paymentRequestDTO.getCustomer().getCustomerId());
+                responseDTO.responseMap(AuthNetField.X_TRANS_ID.getFieldName(), response.getTransactionResponse().getTransId());
+                responseDTO.responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId());
+                responseDTO.responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
+                responseDTO.responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());
                 
                 if(paymentRequestDTO.billToPopulated()) {
                     responseDTO.responseMap(AuthNetField.X_FIRST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressFirstName())
