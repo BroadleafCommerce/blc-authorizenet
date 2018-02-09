@@ -10,7 +10,7 @@
     <artifactId>broadleaf-authorizenet</artifactId>
     <name>BroadleafCommerce Authorize.net</name>
     <description>BroadleafCommerce Authorize.net</description>
-    <version>2.6.9-GA</version>
+    <version>2.6.10-SNAPSHOT</version>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <blc.version>5.0.12-GA</blc.version>
@@ -20,7 +20,7 @@
         <connection>scm:git:git@github.com:BroadleafCommerce/blc-authorizenet.git</connection>
         <developerConnection>scm:git:git@github.com:BroadleafCommerce/blc-authorizenet.git</developerConnection>
         <url>https://github.com/BroadleafCommerce/BroadleafCommerce</url>
-      <tag>broadleaf-authorizenet-2.6.9-GA</tag>
+      <tag>HEAD</tag>
   </scm>
 
     <url>http://www.broadleafcommerce.com</url>
