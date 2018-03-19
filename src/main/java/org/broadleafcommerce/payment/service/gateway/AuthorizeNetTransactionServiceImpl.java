@@ -10,7 +10,7 @@
  * the Broadleaf End User License Agreement (EULA), Version 1.1
  * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
  * shall apply.
- * 
+ *
  * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
@@ -76,10 +76,10 @@ import net.authorize.util.XmlUtility;
 public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTransactionService implements PaymentGatewayTransactionService {
 
     private static final Log LOG = LogFactory.getLog(AuthorizeNetTransactionServiceImpl.class);
-    
+
     @Resource(name = "blAuthorizeNetConfiguration")
     protected AuthorizeNetConfiguration configuration;
-    
+
     @Resource
     protected AuthorizeNetUtil util;
 
@@ -127,15 +127,15 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
 
     protected PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
         Merchant merchant = getAuthorizenetMerchant(paymentRequestDTO);
-        
+
         PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
-        
+
         parseOutConsolidatedTokenField(paymentRequestDTO);
-        
+
         // Use the CIM API to send this transaction using the saved information
         if (paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.CUSTOMER_PROFILE_ID)
                 && paymentRequestDTO.getAdditionalFields().containsKey(MessageConstants.PAYMENT_PROFILE_ID)) {
-            
+
             if (transactionType.equals(TransactionType.VOID)) {
                 TransactionRequestType transactionVoid = new TransactionRequestType();
                 if (configuration.isSandbox()) {
@@ -147,21 +147,21 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 merchantAuthenticationType.setName(configuration.getLoginId());
                 merchantAuthenticationType.setTransactionKey(configuration.getTransactionKey());
                 ApiOperationBase.setMerchantAuthentication(merchantAuthenticationType);
-                
+
                 transactionVoid.setTransactionType(TransactionTypeEnum.VOID_TRANSACTION.value());
                 transactionVoid.setRefTransId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
                 transactionVoid.setCustomer(null);
                 transactionVoid.setPayment(null);
                 transactionVoid.setAmount(null);
-                
+
                 CreateTransactionRequest apiRequest = new CreateTransactionRequest();
                 apiRequest.setTransactionRequest(transactionVoid);
-                
+
                 CreateTransactionController controller = new CreateTransactionController(apiRequest);
                 controller.execute();
-                
+
                 CreateTransactionResponse response = controller.getApiResponse();
-                
+
                 responseDTO.paymentTransactionType(paymentTransactionType);
                 responseDTO.amount(new Money(paymentRequestDTO.getTransactionTotal().toString()));
                 responseDTO.orderId(paymentRequestDTO.getOrderId());
@@ -171,7 +171,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), paymentRequestDTO.getTransactionTotal().toString());
                 responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), response.getTransactionResponse().getAuthCode());
                 responseDTO.responseMap(ResponseField.ACCOUNT_NUMBER.getFieldName(), response.getTransactionResponse().getAccountNumber());
-                responseDTO.responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), (String)paymentRequestDTO.getAdditionalFields().get("x_invoice_num"));
+                responseDTO.responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), (String)paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_INVOICE_NUM.getFieldName()));
                 responseDTO.responseMap(AuthNetField.X_LOGIN.getFieldName(), configuration.getLoginId());
                 responseDTO.responseMap(AuthNetField.X_VERSION_FIELD.getFieldName(), configuration.getTransactionVersion());
                 responseDTO.responseMap(AuthNetField.X_METHOD.getFieldName(), "CC");
@@ -183,7 +183,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId());
                 responseDTO.responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId());
                 responseDTO.responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());
-                
+
                 if(paymentRequestDTO.billToPopulated()) {
                     responseDTO.responseMap(AuthNetField.X_FIRST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressFirstName())
                     .responseMap(AuthNetField.X_LAST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressLastName())
@@ -195,40 +195,40 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     .responseMap(AuthNetField.X_EMAIL.getFieldName(), paymentRequestDTO.getBillTo().getAddressEmail() != null ? paymentRequestDTO.getBillTo().getAddressEmail() : paymentRequestDTO.getCustomer().getEmail())
                     .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
                 }
-                
-                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
+
+                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) &&
                     Integer.toString(ResponseCode.APPROVED.getCode()).equals(response.getTransactionResponse().getResponseCode()));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
                 }
-                
+
                 return responseDTO;
             }
-            
+
             net.authorize.cim.Transaction transaction = merchant.createCIMTransaction(net.authorize.cim.TransactionType.CREATE_CUSTOMER_PROFILE_TRANSACTION);
             transaction.setCustomerProfileId((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.CUSTOMER_PROFILE_ID));
-            
+
             PaymentTransaction paymentTransaction = PaymentTransaction.createPaymentTransaction();
             transaction.setPaymentTransaction(paymentTransaction);
             paymentTransaction.setTransactionType(transactionType);
             paymentTransaction.setCustomerPaymentProfileId((String) paymentRequestDTO.getAdditionalFields().get(MessageConstants.PAYMENT_PROFILE_ID));
-            
+
             Order order = Order.createOrder();
             paymentTransaction.setOrder(order);
             order.setTotalAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
             order.setInvoiceNumber(paymentRequestDTO.getOrderId());
             order.setDescription(paymentRequestDTO.getOrderDescription());
-            
+
             ShippingCharges shipping = ShippingCharges.createShippingCharges();
             order.setShippingCharges(shipping);
             shipping.setFreightAmount(paymentRequestDTO.getShippingTotal());
             shipping.setTaxAmount(paymentRequestDTO.getTaxTotal());
-            
+
             // Submit the transaction
-            net.authorize.cim.Result<net.authorize.cim.Transaction> gatewayResult = 
+            net.authorize.cim.Result<net.authorize.cim.Transaction> gatewayResult =
                     (net.authorize.cim.Result<net.authorize.cim.Transaction>)merchant.postTransaction(transaction);
-            
+
             responseDTO.successful(gatewayResult.isOk());
             responseDTO.rawResponse(gatewayResult.getTarget().getCurrentResponse().dump());
             responseDTO.orderId(paymentRequestDTO.getOrderId());
@@ -246,7 +246,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             for (ResponseField fieldKey : gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().keySet()) {
                 responseDTO.responseMap(fieldKey.getFieldName(), gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().get(fieldKey));
             }
-            
+
         } else {
             if (paymentRequestDTO.getAdditionalFields().containsKey("X_TRANS_ID")) {
                 Transaction transaction = merchant.createAIMTransaction(transactionType, new BigDecimal(paymentRequestDTO.getTransactionTotal()));
@@ -259,7 +259,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     }
                 }
                 transaction.setTransactionId((String) paymentRequestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName()));
-    
+
                 if (transactionType.equals(TransactionType.AUTH_CAPTURE) || transactionType.equals(TransactionType.AUTH_ONLY)) {
                     CreditCard creditCard = CreditCard.createCreditCard();
                     creditCard.setCreditCardNumber(paymentRequestDTO.getCreditCard().getCreditCardNum());
@@ -278,14 +278,14 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     if (cardNumOrLastFour == null && paymentRequestDTO.creditCardPopulated()) {
                         cardNumOrLastFour = paymentRequestDTO.getCreditCard().getCreditCardNum();
                     }
-    
+
                     CreditCard creditCard = CreditCard.createCreditCard();
                     creditCard.setCreditCardNumber(cardNumOrLastFour);
                     transaction.setCreditCard(creditCard);
                 }
-    
+
                 Result<Transaction> result = (Result<Transaction>) merchant.postTransaction(transaction);
-    
+
                 responseDTO.paymentTransactionType(paymentTransactionType);
                 responseDTO.rawResponse(result.getTarget().toNVPString());
                 if (result.getTarget().getResponseField(ResponseField.AMOUNT) != null) {
@@ -299,13 +299,13 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 responseDTO.responseMap(ResponseField.TRANSACTION_TYPE.getFieldName(), result.getTarget().getTransactionType().getValue());
                 responseDTO.responseMap(ResponseField.AMOUNT.getFieldName(), result.getTarget().getResponseField(ResponseField.AMOUNT));
                 responseDTO.responseMap(ResponseField.AUTHORIZATION_CODE.getFieldName(), result.getTarget().getAuthorizationCode());
-    
+
                 responseDTO.successful(result.isApproved());
                 if (result.isError()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
                 }
-    
+
                 for (String fieldKey : result.getTarget().getMerchantDefinedMap().keySet()) {
                     responseDTO.responseMap(fieldKey, result.getTarget().getMerchantDefinedField(fieldKey));
                 }
@@ -322,16 +322,16 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 data.setDataDescriptor((String)paymentRequestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR"));
                 data.setDataValue((String)paymentRequestDTO.getAdditionalFields().get("OPAQUE_DATA_VALUE"));
                 paymentType.setOpaqueData(data);
-                
+
                 CustomerDataType customer = new CustomerDataType();
                 customer.setType(CustomerTypeEnum.INDIVIDUAL);
                 customer.setId(paymentRequestDTO.getCustomer().getCustomerId());
                 customer.setEmail(paymentRequestDTO.getCustomer().getEmail());
-                
+
                 transaction.setCustomer(customer);
-                
+
                 AddressDTO billing = paymentRequestDTO.getBillTo();
-                
+
                 CustomerAddressType customerAddress = new CustomerAddressType();
                 customerAddress.setFirstName(billing.getAddressFirstName());
                 customerAddress.setLastName(billing.getAddressLastName());
@@ -350,7 +350,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 transaction.setPayment(paymentType);
                 transaction.setBillTo(customerAddress);
                 transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
-                
+
                 if (transactionType.equals(TransactionType.AUTH_CAPTURE)) {
                     transaction.setTransactionType(TransactionTypeEnum.AUTH_CAPTURE_TRANSACTION.value());
                 } else if (transactionType.equals(TransactionType.AUTH_ONLY)) {
@@ -364,18 +364,18 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 } else if (transactionType.equals(TransactionType.PRIOR_AUTH_CAPTURE)) {
                     transaction.setTransactionType(TransactionTypeEnum.PRIOR_AUTH_CAPTURE_TRANSACTION.value());
                 }
-                
+
                 CreateTransactionRequest apiRequest = new CreateTransactionRequest();
                 apiRequest.setTransactionRequest(transaction);
                 apiRequest.setMerchantAuthentication(getMerchantAuthentication(paymentRequestDTO));
-                
+
                 CreateTransactionController controller = new CreateTransactionController(apiRequest);
-                
+
                 net.authorize.Environment authnetEnv = configuration.isSandbox() ? net.authorize.Environment.SANDBOX : net.authorize.Environment.PRODUCTION;
                 controller.execute(authnetEnv);
-                
+
                 CreateTransactionResponse response = controller.getApiResponse();
-                
+
                 try {
                     responseDTO.rawResponse(XmlUtility.getXml(response));
                 } catch (IOException | JAXBException e) {
@@ -402,7 +402,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                            .responseMap(MessageConstants.BLC_CID, paymentRequestDTO.getCustomer().getCustomerId())
                            .responseMap(MessageConstants.BLC_OID, paymentRequestDTO.getOrderId())
                            .responseMap(MessageConstants.AUTHORIZENET_SERVER_URL, configuration.getServerUrl());
-                
+
                 if(paymentRequestDTO.billToPopulated()) {
                     responseDTO.responseMap(AuthNetField.X_FIRST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressFirstName())
                     .responseMap(AuthNetField.X_LAST_NAME.getFieldName(), paymentRequestDTO.getBillTo().getAddressLastName())
@@ -414,18 +414,18 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                     .responseMap(AuthNetField.X_EMAIL.getFieldName(), paymentRequestDTO.getBillTo().getAddressEmail() != null ? paymentRequestDTO.getBillTo().getAddressEmail() : paymentRequestDTO.getCustomer().getEmail())
                     .responseMap(AuthNetField.X_PHONE.getFieldName(), paymentRequestDTO.getBillTo().getAddressPhone());
                 }
-                
+
                 for(String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
                     responseDTO.responseMap(fieldKey, (String)paymentRequestDTO.getAdditionalFields().get(fieldKey));
                 }
-                
-                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) && 
+
+                responseDTO.successful(response.getMessages().getResultCode().equals(MessageTypeEnum.OK) &&
                     Integer.toString(ResponseCode.APPROVED.getCode()).equals(response.getTransactionResponse().getResponseCode()));
                 if (!responseDTO.isSuccessful()) {
                     responseDTO.valid(false);
                     responseDTO.completeCheckoutOnCallback(false);
                 }
-                
+
             } else {
 
                 throw new IllegalStateException( "Cannot determine action from additionalFields: \n" + paymentRequestDTO.getAdditionalFields());
@@ -447,7 +447,7 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
         Merchant merchant = Merchant.createMerchant(env, configuration.getLoginId(), configuration.getTransactionKey());
         return merchant;
     }
-    
+
     protected MerchantAuthenticationType getMerchantAuthentication(PaymentRequestDTO paymentRequestDTO) {
         MerchantAuthenticationType merchantAuthenticationType  = new MerchantAuthenticationType() ;
         merchantAuthenticationType.setName(configuration.getLoginId());
@@ -459,9 +459,9 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
      * Takes a "TOKEN" field from the given <b>paymentRequestDTO</b> and parses that into distinct parts of
      * {@link MessageConstants#CUSTOMER_PROFILE_ID} and {@link MessageConstants#PAYMENT_PROFILE_ID} and puts each of those
      * into the given {@link PaymentRequestDTO#getAdditionalFields()}
-     * 
+     *
      * @param paymentRequestDTO
-     * 
+     *
      */
     protected void parseOutConsolidatedTokenField(PaymentRequestDTO paymentRequestDTO) {
         // NOTE: in Broadleaf 4.0.5+ the "TOKEN" field is an enum in PaymentAdditionalFieldType.TOKEN. This string is hardcoded
