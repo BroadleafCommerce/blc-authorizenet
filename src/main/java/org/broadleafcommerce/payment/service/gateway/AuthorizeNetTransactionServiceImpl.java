@@ -232,19 +232,40 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
             responseDTO.successful(gatewayResult.isOk());
             responseDTO.rawResponse(gatewayResult.getTarget().getCurrentResponse().dump());
             responseDTO.orderId(paymentRequestDTO.getOrderId());
-            Map<ResponseField, String> responseMap = gatewayResult.getDirectResponseList().get(0).getDirectResponseMap();
-            responseDTO.creditCard()
-                .creditCardLastFour(responseMap.get(ResponseField.ACCOUNT_NUMBER))
-                .creditCardType(responseMap.get(ResponseField.CARD_TYPE));
-            responseDTO.amount(new Money(responseMap.get(ResponseField.AMOUNT)));
-            responseDTO.customer().email(responseMap.get(ResponseField.EMAIL_ADDRESS));
-            responseDTO.paymentTransactionType(paymentTransactionType);
-            responseDTO.responseMap(AuthNetField.X_TRANS_ID.getFieldName(), responseMap.get(ResponseField.TRANSACTION_ID));
+
+            if (gatewayResult.getDirectResponseList()==null || gatewayResult.getDirectResponseList().size()==0) {
+
+                if ("Error".equals(gatewayResult.getResultCode()) && gatewayResult.getMessages().size()>0) {
+
+                    StringBuilder sb = new StringBuilder("Direct response list is empty or null. Authnet error: ")
+                            .append(gatewayResult.getMessages().get(0).getCode())
+                            .append(" ")
+                            .append(gatewayResult.getMessages().get(0).getText());
+
+                    LOG.error(sb.toString());
+
+                }
+
+                LOG.error("Direct response list is empty or null");
+
+            } else {
+
+                Map<ResponseField, String> responseMap = gatewayResult.getDirectResponseList().get(0).getDirectResponseMap();
+                responseDTO.creditCard()
+                        .creditCardLastFour(responseMap.get(ResponseField.ACCOUNT_NUMBER))
+                        .creditCardType(responseMap.get(ResponseField.CARD_TYPE));
+                responseDTO.amount(new Money(responseMap.get(ResponseField.AMOUNT)));
+                responseDTO.customer().email(responseMap.get(ResponseField.EMAIL_ADDRESS));
+                responseDTO.paymentTransactionType(paymentTransactionType);
+                responseDTO.responseMap(AuthNetField.X_TRANS_ID.getFieldName(), responseMap.get(ResponseField.TRANSACTION_ID));
+
+                for (ResponseField fieldKey : gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().keySet()) {
+                    responseDTO.responseMap(fieldKey.getFieldName(), gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().get(fieldKey));
+                }
+            }
+
             for (String fieldKey : paymentRequestDTO.getAdditionalFields().keySet()) {
                 responseDTO.responseMap(fieldKey, (String) paymentRequestDTO.getAdditionalFields().get(fieldKey));
-            }
-            for (ResponseField fieldKey : gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().keySet()) {
-                responseDTO.responseMap(fieldKey.getFieldName(), gatewayResult.getDirectResponseList().get(0).getDirectResponseMap().get(fieldKey));
             }
 
         } else {
