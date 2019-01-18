@@ -64,6 +64,8 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
         return propertiesService.resolveSystemProperty("gateway.authorizenet.transactionKey");
     }
 
+    //@deprecated - MD5 hash is no longer used in favor of Accept.js integration
+    @Deprecated
     @Override
     public String getMd5Key() {
         return propertiesService.resolveSystemProperty("gateway.authorizenet.merchantMd5Key");
