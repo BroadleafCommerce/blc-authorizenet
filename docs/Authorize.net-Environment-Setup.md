@@ -10,9 +10,7 @@
 2. Check your email to find the default Secret Answer that will be asigned to you. You can change this by going into Account > User Profile > Change Security Question and Answer
 3. Create a new Transaction Key by navigating to Account > Settings > API Login ID and Transaction Key. Fill out the form to generate a new key
 ![Authorize.net Console](payment-authorizenet-console-2.png)
-4. Create an MD5Hash (e.g. 12345) by navigating to Account > Settings > MD5Hash
-![Authorize.net Console](payment-authorizenet-console-3.png)
-5. Obtain a Client Token Key to use Accept.js 
+4. Obtain a Client Token Key to use Accept.js 
 https://developer.authorize.net/api/reference/features/acceptjs.html
 
 > * Note all of these values down as you will need to enter them in your environment properties files.
@@ -55,21 +53,18 @@ You will need to enter the following key/value pairs in the appropriate location
     gateway.authorizenet.loginId=?
     gateway.authorizenet.clientKey=?
     gateway.authorizenet.transactionKey=?
-    gateway.authorizenet.merchantMd5Key=?
     gateway.authorizenet.serverUrl=https://test.authorize.net/gateway/transact.dll
     
 ### staging.properties
     gateway.authorizenet.loginId=?
     gateway.authorizenet.clientKey=?
     gateway.authorizenet.transactionKey=?
-    gateway.authorizenet.merchantMd5Key=?
     gateway.authorizenet.serverUrl=https://secure2.authorize.net/gateway/transact.dll
 
 ### production.properties 
     gateway.authorizenet.loginId=?
     gateway.authorizenet.clientKey=?
     gateway.authorizenet.transactionKey=?
-    gateway.authorizenet.merchantMd5Key=?   
     gateway.authorizenet.serverUrl=https://secure2.authorize.net/gateway/transact.dll
     gateway.authorizenet.sandbox=false
     gateway.authorizenet.acceptJsUrl=https://js.authorize.net/v1/Accept.js
