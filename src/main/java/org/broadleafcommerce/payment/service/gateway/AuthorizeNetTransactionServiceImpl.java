@@ -331,24 +331,26 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
                 transaction.setCustomer(customer);
                 
                 AddressDTO billing = paymentRequestDTO.getBillTo();
-                
-                CustomerAddressType customerAddress = new CustomerAddressType();
-                customerAddress.setFirstName(billing.getAddressFirstName());
-                customerAddress.setLastName(billing.getAddressLastName());
-                customerAddress.setAddress(billing.getAddressLine1());
-                customerAddress.setCity(billing.getAddressCityLocality());
-                customerAddress.setState(billing.getAddressStateRegion());
-                customerAddress.setZip(billing.getAddressPostalCode());
-                customerAddress.setCountry(billing.getAddressCountryCode());
-                customerAddress.setPhoneNumber(billing.getAddressPhone());
-                if (StringUtils.isNotEmpty(billing.getAddressEmail())) {
-                    customerAddress.setEmail(billing.getAddressEmail());
-                } else {
-                    customerAddress.setEmail(paymentRequestDTO.getCustomer().getEmail());
+
+                if (billing != null) {
+                    CustomerAddressType customerAddress = new CustomerAddressType();
+                    customerAddress.setFirstName(billing.getAddressFirstName());
+                    customerAddress.setLastName(billing.getAddressLastName());
+                    customerAddress.setAddress(billing.getAddressLine1());
+                    customerAddress.setCity(billing.getAddressCityLocality());
+                    customerAddress.setState(billing.getAddressStateRegion());
+                    customerAddress.setZip(billing.getAddressPostalCode());
+                    customerAddress.setCountry(billing.getAddressCountryCode());
+                    customerAddress.setPhoneNumber(billing.getAddressPhone());
+                    if (StringUtils.isNotEmpty(billing.getAddressEmail())) {
+                        customerAddress.setEmail(billing.getAddressEmail());
+                    } else {
+                        customerAddress.setEmail(paymentRequestDTO.getCustomer().getEmail());
+                    }
+                    transaction.setBillTo(customerAddress);
                 }
 
                 transaction.setPayment(paymentType);
-                transaction.setBillTo(customerAddress);
                 transaction.setAmount(new BigDecimal(paymentRequestDTO.getTransactionTotal()));
                 
                 if (transactionType.equals(TransactionType.AUTH_CAPTURE)) {
