@@ -131,4 +131,6 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     public Boolean isSandbox();
 
     public String getAcceptJsUrl();
+
+    public String getGatewayMerchantId();
 }
