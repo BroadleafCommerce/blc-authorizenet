@@ -19,4 +19,4 @@ You will need to enter the following key/value pairs in the appropriate location
 ### production.properties 
     gateway.authorizenet.gatewayMerchantId={Your Gateway Merchant Id}
 
-Now that you have your environment set up, let's begin setting up the [[Authorize.net Quick Start Google Pay]].
+Now that you have your environment set up, let's begin setting up the [[Authorize.net Google Pay Quick Start]].
