@@ -344,7 +344,7 @@ public class AuthorizeNetCheckoutController extends BroadleafCheckoutController 
         // Create the UNCONFIRMED transaction for the payment
         PaymentTransaction transaction = orderPaymentService.createTransaction();
         transaction.setAmount(cart.getTotalAfterAppliedPayments());
-        transaction.setRawResponse("Authorize.net Accept.js Payment Nonce");
+        transaction.setRawResponse("Authorize.net Google Payment Nonce");
         transaction.setSuccess(true);
         transaction.setType(PaymentTransactionType.UNCONFIRMED);
         transaction.getAdditionalFields().put("OPAQUE_DATA_DESCRIPTOR", dataDescriptor);

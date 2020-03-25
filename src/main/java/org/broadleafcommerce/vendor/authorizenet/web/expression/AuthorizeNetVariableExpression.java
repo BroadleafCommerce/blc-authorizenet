@@ -68,5 +68,9 @@ public class AuthorizeNetVariableExpression implements BroadleafVariableExpressi
         return configuration.getGatewayMerchantId();
     }
 
+    public String getAppleMerchantId() {
+        return configuration.getAppleMerchantId();
+    }
+
 }
 

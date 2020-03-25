@@ -233,4 +233,29 @@ public class AuthorizeNetConfigurationImpl extends AbstractPaymentGatewayConfigu
     public String getGatewayMerchantId() {
         return propertiesService.resolveSystemProperty("gateway.authorizenet.gatewayMerchantId");
     }
+
+    @Override
+    public String getAppleMerchantId() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.apple.merchantId");
+    }
+
+    @Override
+    public String getAppleKeyStoreFilePath() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.apple.keyStoreFilePath");
+    }
+
+    @Override
+    public String getAppleKeyStorePassword() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.apple.keyStorePassword");
+    }
+
+    @Override
+    public String getVerifiedDomainName() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.apple.verifiedDomainName");
+    }
+
+    @Override
+    public String getVerifiedDomainDisplayName() {
+        return propertiesService.resolveSystemProperty("gateway.authorizenet.apple.verifiedDomainDisplayName");
+    }
 }

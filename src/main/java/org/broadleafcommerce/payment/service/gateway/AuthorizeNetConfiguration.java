@@ -133,4 +133,14 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     public String getAcceptJsUrl();
 
     public String getGatewayMerchantId();
+
+    public String getAppleMerchantId();
+
+    public String getAppleKeyStoreFilePath();
+
+    public String getAppleKeyStorePassword();
+
+    public String getVerifiedDomainName();
+
+    public String getVerifiedDomainDisplayName();
 }
