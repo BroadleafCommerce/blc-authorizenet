@@ -1,10 +1,10 @@
-# Authorize.net Quick Start With Google Pay
+# Authorize.net Quick Start Google Pay
 
 Broadleaf Commerce offers an out-of-the-box Authorize.net solution that requires little configuration and is easily set up. 
 The quick start solution implements the [[Google Pay | https://developer.authorize.net/api/reference/features/in-app.html#Google_Pay%E2%84%A2]] model offered by Authorize.net.
 This implementation should be useful for those with a simple checkout flow.
 
-**You must have completed the [[Authorize.net Environment Setup]] before continuing**
+**You must have completed the [[Authorize.net Google Pay Environment Setup]] before continuing**
 
 
 ## Adding Authorize.net Checkout Support

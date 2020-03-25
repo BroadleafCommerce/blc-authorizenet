@@ -1,4 +1,5 @@
 - [[Home | .]]
 - [[Authorize.net Quick Start]]
-- [[Authorize.net Quick Start With Google Pay]]
 - [[Authorize.net Environment Setup]]
+- [[Authorize.net Quick Start Google Pay]]
+- [[Authorize.net Google Pay Environment Setup]]
