@@ -10,7 +10,7 @@
  * the Broadleaf End User License Agreement (EULA), Version 1.1
  * (the "Commercial License" located at http://license.broadleafcommerce.org/commercial_license-1.1.txt)
  * shall apply.
- *
+ * 
  * Alternatively, the Commercial License may be replaced with a mutually agreed upon license (the "Custom License")
  * between you and Broadleaf Commerce. You may not use this file except in compliance with the applicable license.
  * #L%
@@ -128,7 +128,8 @@ public class AuthorizeNetTransactionServiceImpl extends AbstractPaymentGatewayTr
     protected PaymentResponseDTO common(PaymentRequestDTO paymentRequestDTO, TransactionType transactionType, PaymentTransactionType paymentTransactionType) {
         Merchant merchant = getAuthorizenetMerchant(paymentRequestDTO);
 
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
+        PaymentType requestPaymentType = paymentRequestDTO.getPaymentType() == null ? PaymentType.CREDIT_CARD : paymentRequestDTO.getPaymentType();
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(requestPaymentType, AuthorizeNetGatewayType.AUTHORIZENET);
 
         parseOutConsolidatedTokenField(paymentRequestDTO);
 

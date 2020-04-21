@@ -89,7 +89,8 @@ public class AuthorizeNetCustomerService extends AbstractPaymentGatewayCustomerS
                 "Must pass 'x_trans_id' value on the additionalFields of the Payment Request DTO");
         
         String previousTransId = (String) requestDTO.getAdditionalFields().get(AuthNetField.X_TRANS_ID.getFieldName());
-        PaymentResponseDTO paymentResponse = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET);
+        PaymentType requestPaymentType = requestDTO.getPaymentType() == null ? PaymentType.CREDIT_CARD : requestDTO.getPaymentType();
+        PaymentResponseDTO paymentResponse = new PaymentResponseDTO(requestPaymentType, AuthorizeNetGatewayType.AUTHORIZENET);
         if (requestDTO.getAdditionalFields().get("OPAQUE_DATA_DESCRIPTOR") != null) {
             TransactionRequestType transaction = new TransactionRequestType();
             ApiOperationBase.setEnvironment(Environment.SANDBOX);

@@ -80,7 +80,8 @@ public class AuthorizeNetTransparentRedirectServiceImpl extends AbstractPaymentG
         String orderId = requestDTO.getOrderId();
 
         Fingerprint fingerprint = Fingerprint.createFingerprint(apiLoginId, transactionKey, System.currentTimeMillis(), requestDTO.getTransactionTotal());
-        PaymentResponseDTO responseDTO = new PaymentResponseDTO(PaymentType.CREDIT_CARD, AuthorizeNetGatewayType.AUTHORIZENET)
+        PaymentType requestPaymentType = requestDTO.getPaymentType() == null ? PaymentType.CREDIT_CARD : requestDTO.getPaymentType();
+        PaymentResponseDTO responseDTO = new PaymentResponseDTO(requestPaymentType, AuthorizeNetGatewayType.AUTHORIZENET)
         .responseMap(AuthNetField.X_INVOICE_NUM.getFieldName(), System.currentTimeMillis()+"")
         .responseMap(AuthNetField.X_RELAY_URL.getFieldName(), relayResponseURL)
         .responseMap(AuthNetField.X_LOGIN.getFieldName(), apiLoginId)

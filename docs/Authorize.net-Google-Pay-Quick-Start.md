@@ -319,7 +319,7 @@ public class AuthorizeNetCheckoutController extends BroadleafCheckoutController 
 
         //Create a new PAYMENT_NONCE Order Payment
         OrderPayment paymentNonce = orderPaymentService.create();
-        paymentNonce.setType(PaymentType.CREDIT_CARD);
+        paymentNonce.setType(PaymentType.GOOGLE_PAY);
         paymentNonce.setPaymentGatewayType(AuthorizeNetGatewayType.AUTHORIZENET);
         paymentNonce.setAmount(cart.getTotalAfterAppliedPayments());
         paymentNonce.setOrder(cart);
