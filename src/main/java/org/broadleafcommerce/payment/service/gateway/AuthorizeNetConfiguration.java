@@ -131,4 +131,16 @@ public interface AuthorizeNetConfiguration extends PaymentGatewayConfiguration {
     public Boolean isSandbox();
 
     public String getAcceptJsUrl();
+
+    public String getGatewayMerchantId();
+
+    public String getAppleMerchantId();
+
+    public String getAppleKeyStoreFilePath();
+
+    public String getAppleKeyStorePassword();
+
+    public String getVerifiedDomainName();
+
+    public String getVerifiedDomainDisplayName();
 }
